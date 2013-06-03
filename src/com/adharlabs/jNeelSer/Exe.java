@@ -12,6 +12,9 @@ import java.io.IOException;
  */
 public class Exe {
 
+    /**
+     * Static block to Configure the logger by default
+     */
     static{
         try {
             com.adharlabs.log.LogCustomHandler.setup(Exe.class.getName());
