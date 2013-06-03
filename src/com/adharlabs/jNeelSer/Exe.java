@@ -1,6 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * jNeelSer - Java Full loaded Serial Port Terminal
+ * 
  */
 package com.adharlabs.jNeelSer;
 
