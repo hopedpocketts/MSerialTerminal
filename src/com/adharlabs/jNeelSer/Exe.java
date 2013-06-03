@@ -4,12 +4,23 @@
  */
 package com.adharlabs.jNeelSer;
 
+import java.io.IOException;
+
 /**
  *
  * @author bose
  */
 public class Exe {
 
+    static{
+        try {
+            com.adharlabs.log.LogCustomHandler.setup(Exe.class.getName());
+        } catch (IOException ex) {
+            System.err.println("Error could not intialize the logger:\n"
+                    +ex.toString());
+            System.exit(1);            
+        }
+    }
     /**
      * @param args the command line arguments
      */
