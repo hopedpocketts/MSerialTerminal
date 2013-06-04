@@ -23,6 +23,8 @@ package com.adharlabs.UI;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Toolkit;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -81,7 +83,11 @@ public class VisualTerminal extends JFrame{
         this.jtextpane.setComponentPopupMenu(this.jpopupmenu);
         this.styledoc = this.jtextpane.getStyledDocument();
         this.jpopupmenu.add(this.sTitle+" Menu");
-        this.jpopupmenu.addSeparator();        
+        this.jpopupmenu.addSeparator();      
+        
+        // Set Form at Center of Screen
+        Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+        super.setLocation(d.width/2-this.iWidth/2 ,d.height/2-this.iHeight/2 );
         
         //Run the TextPane Thread
         (new Thread(this.xtph,"TextPane Thread")).start();

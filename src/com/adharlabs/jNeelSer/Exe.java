@@ -5,8 +5,8 @@
 package com.adharlabs.jNeelSer;
 
 import com.adharlabs.UI.VisualTerminal;
-import java.awt.Dimension;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -15,6 +15,8 @@ import java.util.logging.Logger;
  */
 public class Exe {
 
+    @SuppressWarnings("NonConstantLogger")
+    public static Logger LOG;
     /**
      * Static block to Configure the logger by default
      */
@@ -31,9 +33,20 @@ public class Exe {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        // Initialize the Local logger
+        Exe.LOG = com.adharlabs.log.LogCustomHandler.LOG;
+        Exe.LOG.log(Level.INFO,"Begin Exe");
+        
+        // Create the Visual Terminal
         VisualTerminal vs = new VisualTerminal(200, 200, "jNeelSer", 
                 com.adharlabs.log.LogCustomHandler.LOG);
-        vs.println("Hello This is the first lines\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+        
+        // Add some dummy lines
+        vs.println("Hello This is the first lines\n\n\n\n\n\n\n\n\n\n\n\n"+
+                "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"+
+                "\n\n\n\n\n\n\n\n\n\n");
+        
+        // Start Execution
         vs.setVisible(true);
     }
 }
