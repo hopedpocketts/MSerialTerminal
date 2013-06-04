@@ -4,7 +4,10 @@
  */
 package com.adharlabs.jNeelSer;
 
+import com.adharlabs.UI.VisualTerminal;
+import java.awt.Dimension;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  *
@@ -28,6 +31,9 @@ public class Exe {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        VisualTerminal vs = new VisualTerminal(200, 200, "jNeelSer", 
+                com.adharlabs.log.LogCustomHandler.LOG);
+        vs.println("Hello This is the first lines\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+        vs.setVisible(true);
     }
 }
