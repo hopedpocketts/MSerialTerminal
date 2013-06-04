@@ -1,5 +1,22 @@
-/*
+/* Adharlab's Custom Log Handler
  * Logger Class to Initialize the Log Handler and provide addtional functions
+ * @copy © Abhijit Bose , A.D.H.A.R Labs Research Bharat(India), 2013.
+ * 
+ * LogCustomHandler is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * LogCustomHandler is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @email info@adharlabs.in
+ * @website http://adharlabs.in
  * 
  */
 package com.adharlabs.log;
@@ -11,8 +28,8 @@ import java.util.logging.SimpleFormatter;
 
 /**
  * Class to handle the custom intialization of the logger
- *
- * @author bose
+ * @version 1.0_20130605
+ * @author Abhijit Bose , A.D.H.A.R Labs Research Bharat(India)
  */
 public class LogCustomHandler {
 
@@ -115,21 +132,24 @@ public class LogCustomHandler {
             boolean btxtlog, boolean bhtmllog,
             String txtname, String htmlname) throws IOException {
         LOG = Logger.getLogger(logname);
-
+        //Text Logger
         if (btxtlog) {
+            //Autmatically throw exception in case error in path for file name
             fh_Text = new FileHandler(txtname);
             fmt_Text = new SimpleFormatter();
             fh_Text.setFormatter(fmt_Text);
             LOG.addHandler(fh_Text);
         }
-
+        //Html Logger
         if (bhtmllog) {
+            //Autmatically throw exception in case error in path for file name
             fh_Html = new FileHandler(htmlname);
             fmt_Html = new LogHtmlCustomFormatter();
             fh_Html.setFormatter(fmt_Html);
             LOG.addHandler(fh_Html);
         }
-
+        
+        //Print a final Log Go message
         LOG.info("Intialization of Logger Done ...");
     }
 }
