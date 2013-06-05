@@ -6,9 +6,7 @@ package com.adharlabs.jNeelSer;
 
 import com.adharlabs.UI.VisualTerminal;
 import java.io.IOException;
-import java.util.logging.Filter;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
