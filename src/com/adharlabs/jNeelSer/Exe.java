@@ -39,7 +39,7 @@ public class Exe {
         
         // Create the Visual Terminal
         VisualTerminal vs = new VisualTerminal(200, 200, "jNeelSer", 
-                com.adharlabs.log.LogCustomHandler.LOG);
+                Exe.LOG);
         
         // Add some dummy lines
         vs.println("Hello This is the first lines\n\n\n\n\n\n\n\n\n\n\n\n"+

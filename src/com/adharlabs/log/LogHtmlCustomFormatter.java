@@ -48,6 +48,17 @@ public class LogHtmlCustomFormatter extends Formatter {
         // Start the Log Row
         sb.append("<tr>\n");
 
+        // Add the Sequence Number
+        sb.append(" <td>\n");
+        sb.append(record.getSequenceNumber());
+        sb.append(" </td>");
+        
+        // Add the Date Field
+        sb.append("<td>\n");
+        sb.append((new SimpleDateFormat("dd-MMM-yyyy HH:mm"))
+                .format(new Date(record.getMillis())));
+        sb.append("</td>\n");
+
         // Add the Log Level
         int recv = record.getLevel().intValue();
         if (recv == Level.SEVERE.intValue()) {
@@ -72,13 +83,19 @@ public class LogHtmlCustomFormatter extends Formatter {
             sb.append(record.getLevel().getName());
             sb.append("</td>");
         }
-
-        // Now add the Date Field
-        sb.append("<td>\n");
-        sb.append((new SimpleDateFormat("dd-MMM-yyyy HH:mm"))
-                .format(new Date(record.getMillis())));
-        sb.append("</td>\n");
-
+        
+        // Add the Class
+        sb.append(" <td>\n");
+        sb.append(String.format("0x%08X", record.getThreadID()));
+        sb.append(" : ");
+        sb.append(record.getSourceClassName());
+        sb.append(" </td>");
+        
+        // Add the Sequence Number
+        sb.append(" <td>\n");
+        sb.append(record.getSourceMethodName());
+        sb.append(" </td>");
+        
         // Add the Message
         sb.append("<td>\n");
         sb.append(formatMessage(record));
@@ -102,8 +119,8 @@ public class LogHtmlCustomFormatter extends Formatter {
         return "<HTML>\n<HEAD>\n" + (new Date())
                 + "\n</HEAD>\n<BODY>\n<PRE>\n"
                 + "<table width=\"100%\" border>\n  "
-                + "<tr><th>Level</th>"
-                + "<th>Time</th>"
+                + "<tr><th>#</th><th>Time</th><th>Level</th>"
+                + "<th>Class</th><th>Method</th>"
                 + "<th>Log Message</th>"
                 + "</tr>\n";
     }

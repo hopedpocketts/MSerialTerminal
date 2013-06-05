@@ -31,6 +31,7 @@ public class ThreadedTextPaneHandler implements Runnable{
         this.q = queue;
         this.isEnabled = true;
         LOG = log;
+        LOG.fine("Done Initialization");
     }
     
     @Override
@@ -42,6 +43,7 @@ public class ThreadedTextPaneHandler implements Runnable{
                 StyledDocument sd = this.jp.getStyledDocument();
                 try {
                     sd.insertString(sd.getLength(), as.s, as.a);
+                    LOG.log(Level.FINER,"Got String: {0}", as.s);
                 } catch (BadLocationException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }

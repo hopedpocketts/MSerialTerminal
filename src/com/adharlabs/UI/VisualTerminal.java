@@ -93,13 +93,14 @@ public class VisualTerminal extends JFrame{
         (new Thread(this.xtph,"TextPane Thread")).start();
         
         //Set the final Log message
-        this.LOG.log(Level.INFO, "VisualTerminal -{0}- Intialized", sTitle);
+        this.LOG.log(Level.FINE, "VisualTerminal -{0}- Intialized", sTitle);
     }
 
     @Override
     public void setTitle(String title) {
         this.sTitle = title;
         super.setTitle(title); 
+        LOG.log(Level.FINER, "Title: {0}", title);
     }
 
     @Override
@@ -107,26 +108,35 @@ public class VisualTerminal extends JFrame{
         this.iHeight = height;
         this.iWidth = width;
         super.setSize(width, height);
+        LOG.log(Level.FINER, "Size: Height = {0}", height);
+        LOG.log(Level.FINER, "Size: Width = {0}", width);
     }
     
     public void print(String s)
     {
         this.syncqueue.add(new StringWithVisualStyle(s));
+        LOG.log(Level.FINER, "Print: {0}", s);
     }
     
     public void print(String s,Color fg)
     {
         this.syncqueue.add(new StringWithVisualStyle(s,fg));
+        LOG.log(Level.FINER, "Print Fg["+
+                String.format("#%06X",fg.getRGB())+"] : {0}", s);
     }
     
     public void print(String s,Color fg,Color bg)
     {
         this.syncqueue.add(new StringWithVisualStyle(s,fg,bg));
+        LOG.log(Level.FINER, "Print Fg["+
+                String.format("#%06X",fg.getRGB())+"]"+
+                " Bg["+String.format("#%06X",bg.getRGB())+"]"+" : {0}", s);
     }
     
     public void print(String s, SimpleAttributeSet a)
     {
         this.syncqueue.add(new StringWithVisualStyle(s,a));
+        LOG.log(Level.FINER, "Print Attibute["+a.toString()+"] : {0}", s);
     }
     
     public void println(String s)
@@ -152,5 +162,6 @@ public class VisualTerminal extends JFrame{
     public void clear()
     {
         this.jtextpane.setText("");
+        LOG.log(Level.FINER, "Clear the Pane");
     }
 }
