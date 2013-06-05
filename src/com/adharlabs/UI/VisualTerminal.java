@@ -25,11 +25,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -82,8 +87,8 @@ public class VisualTerminal extends JFrame{
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.jtextpane.setComponentPopupMenu(this.jpopupmenu);
         this.styledoc = this.jtextpane.getStyledDocument();
-        this.jpopupmenu.add(this.sTitle+" Menu");
-        this.jpopupmenu.addSeparator();      
+        this.jtextpane.setSelectionColor(Color.YELLOW);
+        this.addRightClickHandlers(); 
         
         // Set Form at Center of Screen
         Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
@@ -164,4 +169,65 @@ public class VisualTerminal extends JFrame{
         this.jtextpane.setText("");
         LOG.log(Level.FINER, "Clear the Pane");
     }
+    
+    private void addRightClickHandlers()
+    {
+        JMenuItem jmClr = new JMenuItem("Clear");
+        jmClr.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clear();
+            }
+        });
+        
+        this.jpopupmenu.add(jmClr);
+        this.jpopupmenu.addSeparator();
+        
+        JMenuItem jmCut = new JMenuItem("Cut");
+        jmCut.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jtextpane.cut();
+            }
+        });
+        
+        this.jpopupmenu.add(jmCut);
+        
+        JMenuItem jmCopy = new JMenuItem("Copy");
+        jmCopy.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jtextpane.copy();
+            }
+        });
+        
+        this.jpopupmenu.add(jmCopy);
+        
+        JMenuItem jmPaste = new JMenuItem("Paste");
+        jmPaste.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jtextpane.paste();
+            }
+        });
+        
+        this.jpopupmenu.add(jmPaste);
+        this.jpopupmenu.addSeparator();
+        
+        JMenuItem jmSelAll = new JMenuItem("Select All");
+        jmSelAll.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jtextpane.selectAll();                
+            }
+        });
+        
+        this.jpopupmenu.add(jmSelAll);
+    }
+    
 }
