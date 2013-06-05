@@ -6,7 +6,9 @@ package com.adharlabs.jNeelSer;
 
 import com.adharlabs.UI.VisualTerminal;
 import java.io.IOException;
+import java.util.logging.Filter;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
@@ -36,7 +38,7 @@ public class Exe {
         // Initialize the Local logger
         Exe.LOG = com.adharlabs.log.LogCustomHandler.LOG;
         Exe.LOG.log(Level.INFO,"Begin Exe");
-        
+        Exe.LOG.setLevel(Level.ALL);//Enable Debug Logs
         // Create the Visual Terminal
         VisualTerminal vs = new VisualTerminal(200, 200, "jNeelSer", 
                 Exe.LOG);
