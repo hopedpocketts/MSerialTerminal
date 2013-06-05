@@ -4,16 +4,10 @@
  */
 package com.adharlabs.jNeelSer;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import jssc.SerialPort;
 import jssc.SerialPortList;
 
 /**
@@ -27,6 +21,10 @@ public class NeelSerOptions {
     public boolean isPortOpen = false;
     public String[] arsPortList;
     public String sPortName;
+    public int iBaudrate;
+    public int iParity;
+    public int iStopBits;
+    public int iFlowControl;
 
     public NeelSerOptions(Logger log) {
         // Assign the Primary Things
