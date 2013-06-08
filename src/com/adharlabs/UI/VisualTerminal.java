@@ -114,17 +114,24 @@ public class VisualTerminal extends JFrame{
         LOG.log(Level.FINER, "Size: Width = {0}", width);
     }
     
+    public void putc(Character c)
+    {
+        this.syncqueue.add(new StringWithVisualStyle(c.toString()));
+        LOG.log(Level.FINEST, "Putc: {0}", c);
+        this.gotoend();
+    }
+    
     public void print(String s)
     {
         this.syncqueue.add(new StringWithVisualStyle(s));
-        LOG.log(Level.FINER, "Print: {0}", s);
+        LOG.log(Level.FINEST, "Print: {0}", s);
         this.gotoend();
     }
     
     public void print(String s,Color fg)
     {
         this.syncqueue.add(new StringWithVisualStyle(s,fg));
-        LOG.log(Level.FINER, "Print Fg["+
+        LOG.log(Level.FINEST, "Print Fg["+
                 String.format("#%06X",fg.getRGB())+"] : {0}", s);
         this.gotoend();
     }
@@ -132,7 +139,7 @@ public class VisualTerminal extends JFrame{
     public void print(String s,Color fg,Color bg)
     {
         this.syncqueue.add(new StringWithVisualStyle(s,fg,bg));
-        LOG.log(Level.FINER, "Print Fg["+
+        LOG.log(Level.FINEST, "Print Fg["+
                 String.format("#%06X",fg.getRGB())+"]"+
                 " Bg["+String.format("#%06X",bg.getRGB())+"]"+" : {0}", s);
         this.gotoend();
@@ -141,7 +148,7 @@ public class VisualTerminal extends JFrame{
     public void print(String s, SimpleAttributeSet a)
     {
         this.syncqueue.add(new StringWithVisualStyle(s,a));
-        LOG.log(Level.FINER, "Print Attibute["+a.toString()+"] : {0}", s);
+        LOG.log(Level.FINEST, "Print Attibute["+a.toString()+"] : {0}", s);
         this.gotoend();
     }
 
