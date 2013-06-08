@@ -172,6 +172,12 @@ public class VisualTerminal extends JFrame{
         LOG.log(Level.FINER, "Clear the Pane");
     }
     
+    public void gotoend()
+    {
+        this.jtextpane.setCaretPosition(
+                            this.jtextpane.getStyledDocument().getLength());
+    }
+    
     private void addRightClickHandlers()
     {
         JMenuItem jmClr = new JMenuItem("Clear");
