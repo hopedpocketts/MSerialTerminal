@@ -140,6 +140,11 @@ public class VisualTerminal extends JFrame{
         this.syncqueue.add(new StringWithVisualStyle(s,a));
         LOG.log(Level.FINER, "Print Attibute["+a.toString()+"] : {0}", s);
     }
+
+    public void println()
+    {
+        this.print(this.sNewLineChar);
+    }
     
     public void println(String s)
     {
