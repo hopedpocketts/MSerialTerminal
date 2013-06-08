@@ -36,6 +36,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 /**
@@ -185,8 +186,12 @@ public class VisualTerminal extends JFrame{
     
     public void gotoend()
     {
-        this.jtextpane.setCaretPosition(
-                            this.jtextpane.getStyledDocument().getLength());
+        this.jtextpane.setCaretPosition(this.jtextpane.getStyledDocument().getLength());
+        //Fix Set the default style at the last char location
+        SimpleAttributeSet aset = new SimpleAttributeSet();
+        StyleConstants.setForeground(aset, Color.black);
+        StyleConstants.setBackground(aset, Color.WHITE);
+        this.jtextpane.setCharacterAttributes(aset, false);
     }
     
     private void addRightClickHandlers()
