@@ -39,11 +39,11 @@ public class Exe {
 
     @SuppressWarnings("NonConstantLogger")
     private static Logger LOG;
-    private NeelSerOptions opt;
+    /*private NeelSerOptions opt;
     private JRadioButtonMenuItem[] arck_port;
     private VisualTerminal vs;
     private JMenuItem jmi_OpenClose;
-    private StringBuilder sRxStream;
+    private StringBuilder sRxStream;*/
 
     /**
      * Static block to Configure the logger by default
@@ -57,7 +57,7 @@ public class Exe {
             System.exit(1);
         }
     }
-
+/*
     private int getSelectPort() {
         int i;
         for (i = 0; i < arck_port.length; i++) {
@@ -151,14 +151,14 @@ public class Exe {
             }
         }
     }
-
+*/
     public Exe() {
         // Initialize the Local logger
         Exe.LOG = com.adharlabs.log.LogCustomHandler.LOG;
         Exe.LOG.log(Level.INFO, "Begin Exe");
         Exe.LOG.setLevel(Level.ALL);//Enable Debug Logs
 
-        // Create the Visual Terminal
+ /*       // Create the Visual Terminal
         vs = new VisualTerminal(400, 600, "jNeelSer",
                 Exe.LOG);
         opt = new NeelSerOptions(Exe.LOG);
@@ -249,7 +249,7 @@ public class Exe {
         opt.iBaudrate = SerialPort.BAUDRATE_115200;
         vs.jtextpane.setAutoscrolls(true);
         // Start Execution
-        vs.setVisible(true);
+        vs.setVisible(true);*/
     }
 
     /**
