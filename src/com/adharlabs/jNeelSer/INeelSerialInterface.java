@@ -42,6 +42,10 @@ public interface INeelSerialInterface {
      * @param state
      */
     void changeRLSD(boolean state);
+    /**
+     * 
+     * @param state 
+     */
     void gotBreak(boolean state);
     /**
      *

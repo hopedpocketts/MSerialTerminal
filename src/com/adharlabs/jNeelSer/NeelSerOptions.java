@@ -459,13 +459,14 @@ public class NeelSerOptions {
      * @param se Serial port event received
      */
     private void Action_SerialPortListen(SerialPortEvent se) {
+        // check if port is open
+        if (this.isPortOpen) {
 
-        synchronized (this) {
-            if (this.isPortOpen) {
+            if (se.isRXCHAR()) {// !!!! Event Received Characters !!!!
+                @SuppressWarnings("UnusedAssignment")
+                byte[] bt = null; //Var to get the data
 
-                if (se.isRXCHAR()) {// !!!! Event Received Characters !!!!
-                    byte[] bt = null; //Var to get the data
-
+                synchronized (this) {
                     //Obtain data from port
                     try {
                         bt = this.xPort.readBytes();
@@ -473,6 +474,8 @@ public class NeelSerOptions {
                         NeelSerOptions.LOG.log(Level.SEVERE,
                                 "Could not obtain the CTS status\n {0}",
                                 ex.toString());
+                        this.notifyAll();
+                        return;
                     }
 
                     //Check if the received array is null or not
@@ -486,14 +489,18 @@ public class NeelSerOptions {
                         NeelSerOptions.LOG.log(Level.FINEST,
                                 "Received change {0}bytes", bt.length);
                     }
-                } else if (se.isCTS()) { // !!!!Event CTS Status Change!!!!
-
+                    this.notifyAll();
+                }
+            } else if (se.isCTS()) { // !!!!Event CTS Status Change!!!!
+                synchronized (this) {
                     try {
                         this.bCTS = this.xPort.isCTS();
                     } catch (SerialPortException ex) {
                         NeelSerOptions.LOG.log(Level.SEVERE,
                                 "Could not obtain the CTS status\n {0}",
                                 ex.toString());
+                        this.notifyAll();
+                        return;
                     }
                     if (this.param_bQueueCommunications) {
                         this.xbCTSqueue.add(this.bCTS);
@@ -502,15 +509,18 @@ public class NeelSerOptions {
                     }
                     NeelSerOptions.LOG.log(Level.FINEST,
                             "CTS change: {0}", this.bCTS);
-
-                } else if (se.isDSR()) {// !!!!Event DSR Status Change!!!!
-
+                    this.notifyAll();
+                }
+            } else if (se.isDSR()) {// !!!!Event DSR Status Change!!!!
+                synchronized (this) {
                     try {
                         this.bDSR = this.xPort.isDSR();
                     } catch (SerialPortException ex) {
                         NeelSerOptions.LOG.log(Level.SEVERE,
                                 "Could not obtain the DSR status\n {0}",
                                 ex.toString());
+                        this.notifyAll();
+                        return;
                     }
                     if (this.param_bQueueCommunications) {
                         this.xbDSRqueue.add(this.bDSR);
@@ -519,15 +529,18 @@ public class NeelSerOptions {
                     }
                     NeelSerOptions.LOG.log(Level.FINEST,
                             "DSR change: {0}", this.bDSR);
-
-                } else if (se.isRING()) {// !!!!Event RING Status Change!!!!
-
+                    this.notifyAll();
+                }
+            } else if (se.isRING()) {// !!!!Event RING Status Change!!!!
+                synchronized (this) {
                     try {
                         this.bRI = this.xPort.isRING();
                     } catch (SerialPortException ex) {
                         NeelSerOptions.LOG.log(Level.SEVERE,
                                 "Could not obtain the RING status\n {0}",
                                 ex.toString());
+                        this.notifyAll();
+                        return;
                     }
                     if (this.param_bQueueCommunications) {
                         this.xbRIqueue.add(this.bRI);
@@ -536,15 +549,18 @@ public class NeelSerOptions {
                     }
                     NeelSerOptions.LOG.log(Level.FINEST,
                             "RING change: {0}", this.bRI);
-
-                } else if (se.isRLSD()) {
-
+                    this.notifyAll();
+                }
+            } else if (se.isRLSD()) {
+                synchronized (this) {
                     try {
                         this.bRLSD = this.xPort.isRLSD();
                     } catch (SerialPortException ex) {
                         NeelSerOptions.LOG.log(Level.SEVERE,
                                 "Could not obtain the RLSD status\n {0}",
                                 ex.toString());
+                        this.notifyAll();
+                        return;
                     }
                     if (this.param_bQueueCommunications) {
                         this.xbRLSDqueue.add(this.bRLSD);
@@ -553,10 +569,12 @@ public class NeelSerOptions {
                     }
                     NeelSerOptions.LOG.log(Level.FINEST,
                             "RLSD change: {0}", this.bRLSD);
+                    this.notifyAll();
+                }
 
-                } else if (se.isTXEMPTY()) {
-                } else if (se.isBREAK()) {
-
+            } else if (se.isTXEMPTY()) {
+            } else if (se.isBREAK()) {
+                synchronized (this) {
                     if (this.param_bQueueCommunications) {
                         this.xbRxBreakqueue.add(true);
                     } else {
@@ -564,11 +582,12 @@ public class NeelSerOptions {
                     }
                     NeelSerOptions.LOG.log(Level.FINEST,
                             "Got Serail Break condition on Receiver");
-
-                } else if (se.isERR()) {
+                    this.notifyAll();
                 }
+            } else if (se.isERR()) {
             }
         }
+
     }
 
     /**
@@ -594,7 +613,7 @@ public class NeelSerOptions {
                     }
                     this.notifyAll();
                 }
-                NeelSerOptions.LOG.finest("Sent "+barr.length+"bytes");
+                NeelSerOptions.LOG.log(Level.FINEST, "Sent {0}bytes", barr.length);
             } else {
                 NeelSerOptions.LOG.warning(
                         "Unable to Send Bytes as Serial port is not "
@@ -603,6 +622,27 @@ public class NeelSerOptions {
         } else {
             NeelSerOptions.LOG.warning(
                     "Unable to Send Bytes as Port is not open ");
+        }
+        return false;
+    }
+
+    public boolean b_SendBreak(int delayms) throws NeelSerException {
+        //Check if port is Open
+        if (this.isPortOpen) {
+            synchronized (this) {
+                try {
+                    this.xPort.sendBreak(delayms);
+                    return true;
+                } catch (SerialPortException ex) {
+                    String s = "Error in Sending Break Signal\n" + ex.toString();
+                    NeelSerOptions.LOG.warning(s);
+                    this.notifyAll();
+                    throw new NeelSerException(eNeelSerialStatus.ERROR_GEN, s);
+                }
+            }
+        } else {
+            NeelSerOptions.LOG.warning(
+                    "Unable to Send Break Signal as Port is not open ");
         }
         return false;
     }
