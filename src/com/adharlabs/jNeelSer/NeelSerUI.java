@@ -4,58 +4,72 @@
  */
 package com.adharlabs.jNeelSer;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * jNeelSer Serial User Interface
- * 
+ *
  * @version 1.0_20130625
  * @author Abhijit Bose , A.D.H.A.R Labs Research, Bharat(India)
  */
-public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterface{
+public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterface {
 
     public final String sProduct = "jNeelSerial";
     public final String sCompany = "A.D.H.A.R Labs Research, Bharat(India)";
     @SuppressWarnings("NonConstantLogger")
     private static Logger LOG;
     private NeelSerOptions nso;
-    
+
     /**
      * Creates new form NeelSerUI
      */
     public NeelSerUI(Logger log) {
         NeelSerUI.LOG = log;
         initComponents();
-        
+
         //Set the title
         super.setTitle(sProduct + " by " + sCompany);
-        
+
         //Initializae the Options base
         nso = new NeelSerOptions(true, NeelSerUI.LOG);
-        
+
         //Get Ports
-        nso.v_refreshPortList();
-        this.xCB_Port.removeAllItems();
-        for (Object object : nso.arsPortList) {
-            this.xCB_Port.addItem(object);
-        }
-        
+        this.v_updatePortList();
+
         //Initialize items
         this.xL_CTS.setOpaque(false);
         this.xL_DSR.setOpaque(false);
         this.xL_RI.setOpaque(false);
         this.xL_RSLD.setOpaque(false);
     }
-    
+
+    /**
+     * Function to update the Port List Combo box
+     */
+    private void v_updatePortList() {
+        // Refresh Port List
+        this.nso.v_refreshPortList();
+        this.xCB_Port.removeAllItems();
+        for (Object object : nso.arsPortList) {
+            this.xCB_Port.addItem(object);
+        }
+    }
+
     //<editor-fold defaultstate="collapsed" desc="Neel Serial Interface Overrides">
     @Override
     public void gotRxData(byte[] arb) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (this.nso.isPortOpen) {
+            System.out.println(arb.length);
+        }
     }
 
     @Override
     public byte[] needTxData() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (this.nso.isPortOpen) {
+            return new byte[1];
+        }
+        return null;
     }
 
     @Override
@@ -88,7 +102,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     //</editor-fold>
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -255,6 +269,11 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         );
 
         xB_OpenClose.setText("Port Open");
+        xB_OpenClose.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                xB_OpenCloseActionPerformed(evt);
+            }
+        });
 
         xP_ModemStatus.setBorder(javax.swing.BorderFactory.createTitledBorder("Modem Status"));
 
@@ -294,15 +313,14 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                         .addGap(18, 18, 18)
                         .addComponent(xL_CTS, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(xL_RI, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
+                        .addComponent(xL_RI, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, xP_ModemStatusLayout.createSequentialGroup()
                         .addComponent(xCK_DTR)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(xCK_RTS)
                         .addGap(18, 18, 18)
-                        .addComponent(xL_RSLD, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())))
+                        .addComponent(xL_RSLD, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         xP_ModemStatusLayout.setVerticalGroup(
             xP_ModemStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -579,7 +597,53 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-    
+
+    private void xB_OpenCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xB_OpenCloseActionPerformed
+        if (this.nso.isPortOpen)//Close the Port
+        {
+            // Enable Controls
+            this.xCB_Port.setEnabled(true);
+            this.xCB_Baud.setEnabled(true);
+            this.xCB_DataLen.setEnabled(true);
+            this.xCB_Parity.setEnabled(true);
+            this.xCB_HandShake.setEnabled(true);
+            this.xB_OpenClose.setText("Port Open");
+            try {
+                if (this.nso.b_closePort()) {
+                    NeelSerUI.LOG.log(Level.ALL, "Port {0} Closed",
+                            this.nso.sPortName);
+                }
+            } catch (NeelSerException ser) {
+                NeelSerUI.LOG.log(Level.SEVERE,
+                        "Got Exception in Closing port: {0}", ser.toString());
+                this.nso.isPortOpen = false;//Force Close
+                // Refresh Port List
+                this.v_updatePortList();
+            }
+        } else //Open the Port
+        {
+            // Get the Current Selected Port
+            this.nso.iSelectedPortIndex = this.xCB_Port.getSelectedIndex();
+            try {
+                if (this.nso.b_openport(this)) {
+                    NeelSerUI.LOG.log(Level.ALL, "Port {0} opened",
+                            this.nso.sPortName);
+                    // Disable All controls and change the Name
+                    this.xCB_Port.setEnabled(false);
+                    this.xCB_Baud.setEnabled(false);
+                    this.xCB_DataLen.setEnabled(false);
+                    this.xCB_Parity.setEnabled(false);
+                    this.xCB_HandShake.setEnabled(false);
+                    this.xB_OpenClose.setText("Port Close");
+                }
+            } catch (NeelSerException ser) {
+                NeelSerUI.LOG.log(Level.SEVERE,
+                        "Got Exception in Opening port: {0}", ser.toString());
+                // Refresh Port List
+                this.v_updatePortList();
+            }
+        }
+    }//GEN-LAST:event_xB_OpenCloseActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
