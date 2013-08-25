@@ -4,8 +4,13 @@
  */
 package com.adharlabs.jNeelSer;
 
+import java.awt.Color;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 /**
  * jNeelSer Serial User Interface
@@ -55,6 +60,81 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
             this.xCB_Port.addItem(object);
         }
     }
+    
+    //<editor-fold defaultstate="collapsed" desc="Internal Prints">
+    /**
+     *
+     * @param s
+     * @param fgColor
+     */
+    private void print(String s, Color fgColor) {
+        StyledDocument sd = this.xTP_RX.getStyledDocument();
+        SimpleAttributeSet a = new SimpleAttributeSet();
+        StyleConstants.setForeground(a, fgColor);
+        try {
+            sd.insertString(sd.getLength(), s, a);
+            NeelSerUI.LOG.log(Level.FINER, "Got String: {0}", s);
+        } catch (BadLocationException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     *
+     * @param s
+     * @param fgColor
+     * @param bgColor
+     */
+    private void print(String s, Color fgColor, Color bgColor) {
+        StyledDocument sd = this.xTP_RX.getStyledDocument();
+        SimpleAttributeSet a = new SimpleAttributeSet();
+        StyleConstants.setForeground(a, fgColor);
+        StyleConstants.setBackground(a, bgColor);
+        try {
+            sd.insertString(sd.getLength(), s, a);
+            NeelSerUI.LOG.log(Level.FINER, "Got String: {0}", s);
+        } catch (BadLocationException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     *
+     */
+    private void println() {
+        this.print("\n", Color.BLACK, Color.WHITE);
+    }
+
+    /**
+     *
+     * @param s
+     */
+    private void println(String s) {
+        this.print(s, Color.BLACK);
+        this.println();
+    }
+
+    /**
+     *
+     * @param s
+     * @param fgColor
+     */
+    private void println(String s, Color fgColor) {
+        this.print(s, fgColor);
+        this.println();
+    }
+
+    /**
+     *
+     * @param s
+     * @param fgColor
+     * @param bgColor
+     */
+    private void println(String s, Color fgColor, Color bgColor) {
+        this.print(s, fgColor, bgColor);
+        this.println();
+    }
+    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Neel Serial Interface Overrides">
     @Override
@@ -612,11 +692,16 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 if (this.nso.b_closePort()) {
                     NeelSerUI.LOG.log(Level.ALL, "Port {0} Closed",
                             this.nso.sPortName);
+                    this.println("Port "+
+                            this.nso.sPortName+" Closed",
+                            Color.MAGENTA);
                 }
             } catch (NeelSerException ser) {
                 NeelSerUI.LOG.log(Level.SEVERE,
                         "Got Exception in Closing port: {0}", ser.toString());
                 this.nso.isPortOpen = false;//Force Close
+                this.println("Error: Could not Close Port "+
+                            this.nso.sPortName,Color.RED);
                 // Refresh Port List
                 this.v_updatePortList();
             }
@@ -628,6 +713,9 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 if (this.nso.b_openport(this)) {
                     NeelSerUI.LOG.log(Level.ALL, "Port {0} opened",
                             this.nso.sPortName);
+                    this.println("Port "+
+                            this.nso.sPortName+" Opened",
+                            Color.MAGENTA);
                     // Disable All controls and change the Name
                     this.xCB_Port.setEnabled(false);
                     this.xCB_Baud.setEnabled(false);
@@ -639,6 +727,8 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
             } catch (NeelSerException ser) {
                 NeelSerUI.LOG.log(Level.SEVERE,
                         "Got Exception in Opening port: {0}", ser.toString());
+                this.println("Error: Could not Open Port "+
+                            this.nso.sPortName,Color.RED);
                 // Refresh Port List
                 this.v_updatePortList();
             }
