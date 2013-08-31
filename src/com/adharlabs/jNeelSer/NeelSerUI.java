@@ -8,12 +8,7 @@ import com.adharlabs.UI.StringWithVisualStyle;
 import java.awt.Color;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 import com.adharlabs.UI.ThreadedTextPaneHandler;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -120,8 +115,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
      * @param s
      */
     private void println(String s) {
-        this.print(s, Color.BLACK);
-        this.println();
+        this.print(s+"\n", Color.BLACK);
     }
 
     /**
@@ -130,8 +124,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
      * @param fgColor
      */
     private void println(String s, Color fgColor) {
-        this.print(s, fgColor);
-        this.println();
+        this.print(s+"\n", fgColor);
     }
 
     /**
@@ -141,8 +134,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
      * @param bgColor
      */
     private void println(String s, Color fgColor, Color bgColor) {
-        this.print(s, fgColor, bgColor);
-        this.println();
+        this.print(s+"\n", fgColor, bgColor);
     }
     //</editor-fold>
 
