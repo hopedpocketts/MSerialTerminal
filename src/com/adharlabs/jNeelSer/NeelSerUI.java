@@ -136,13 +136,29 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     private void println(String s, Color fgColor, Color bgColor) {
         this.print(s+"\n", fgColor, bgColor);
     }
+    
+    private String hexstr(byte [] arr)
+    {
+        String s = "";
+        if(arr != null && arr.length > 0)
+        {
+            for(int i = 0; i< arr.length ;i++)
+            {
+                s += String.format("[%02X]", arr[i]);
+            }
+        }
+        return s;
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Neel Serial Interface Overrides">
     @Override
     public void gotRxData(byte[] arb) {
         if (this.nso.isPortOpen) {
-            this.println(new String(arb));
+            if(this.xRB_RXmode_Ascii.isSelected())
+                this.print(new String(arb), Color.BLACK);
+            else if(this.xRB_RXmode_Hex.isSelected())
+                this.print(this.hexstr(arb),Color.BLACK);
         }
     }
 
