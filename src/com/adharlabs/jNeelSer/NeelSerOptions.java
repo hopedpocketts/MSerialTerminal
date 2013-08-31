@@ -26,7 +26,6 @@ package com.adharlabs.jNeelSer;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JRadioButtonMenuItem;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
@@ -688,51 +687,7 @@ public class NeelSerOptions {
         }
         return false;
     }
-    /**
-     *
-     * @return @throws Exception
-     */
-    public JRadioButtonMenuItem[] refreshPortList_menu() throws Exception {
-        // Get the Port List
-        this.arsPortList = SerialPortList.getPortNames();
-        // Clear the menue
-        JRadioButtonMenuItem[] arck = new JRadioButtonMenuItem[this.arsPortList.length];
-        // Variable to check if the port thats currently open
-        //   is present in the list
-        boolean foundopenport = false;
-        int i = 0;
-        // Cycle through the Port Names
-        for (String s : arsPortList) {
-            // Set the Check box in case the port currently opened is found
-            if (this.isPortOpen && this.sPortName.equals(s)) {
-                arck[i] = new JRadioButtonMenuItem(s, null, true);
-                foundopenport = true;
-                NeelSerOptions.LOG.log(Level.FINER,
-                        "Found Currently opened port: "
-                        + "{0} in the port list", this.sPortName);
-            } else { //In normal case none would be selected
-                arck[i] = (new JRadioButtonMenuItem(s, null, false));
-            }
-            ++i;
-        }
-
-        if (this.isPortOpen) // If the Port currently open is not found in the list Raise Exeption
-        {
-            if (!foundopenport) {
-                NeelSerOptions.LOG.log(Level.WARNING,
-                        "Unable to find currently open port: "
-                        + "{0} in the port list", this.sPortName);
-                throw new Exception("Unable to find currently open port: "
-                        + this.sPortName + " in the port list");
-            } else // In case there is just a refresh and no ports are open
-            //  Make default selection
-            {
-                arck[0].setSelected(true);
-            }
-        }
-        return arck;
-    }
-
+    
     /**
      * Function to search the Port Name Array to find the index of a given port
      * name
