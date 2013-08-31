@@ -4,6 +4,7 @@
  */
 package com.adharlabs.jNeelSer;
 
+import com.adharlabs.UI.StringWithVisualStyle;
 import java.awt.Color;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +12,10 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import com.adharlabs.UI.ThreadedTextPaneHandler;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * jNeelSer Serial User Interface
@@ -25,10 +30,14 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     @SuppressWarnings("NonConstantLogger")
     private static Logger LOG;
     private NeelSerOptions nso;
+    private BlockingQueue<StringWithVisualStyle> RxDispQue;
+    private ThreadedTextPaneHandler RxPaneHandler;
+    private Thread RxPaneThread;
 
     /**
      * Creates new form NeelSerUI
      */
+    @SuppressWarnings("CallToThreadStartDuringObjectConstruction")
     public NeelSerUI(Logger log) {
         NeelSerUI.LOG = log;
         initComponents();
@@ -42,11 +51,22 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         //Get Ports
         this.v_updatePortList();
 
+        // Create the RX Queue and Assign the Handler
+        this.RxDispQue = new LinkedBlockingQueue<StringWithVisualStyle>();
+        this.RxPaneHandler = new ThreadedTextPaneHandler(xTP_RX, RxDispQue, log);
+
+        // Run the RX TextPane Thread
+        this.RxPaneThread = new Thread(this.RxPaneHandler, "RX TextPane Thread");
+        this.RxPaneThread.start();
+
         //Initialize items
         this.xL_CTS.setOpaque(false);
         this.xL_DSR.setOpaque(false);
         this.xL_RI.setOpaque(false);
         this.xL_RSLD.setOpaque(false);
+
+        // Print Some Messages
+        this.println("Initialization Done! ... let the fun begin",Color.BLUE);
     }
 
     /**
@@ -59,8 +79,9 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         for (Object object : nso.arsPortList) {
             this.xCB_Port.addItem(object);
         }
+        this.xCB_Port.addItem("Update");
     }
-    
+
     //<editor-fold defaultstate="collapsed" desc="Internal Prints">
     /**
      *
@@ -68,15 +89,9 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
      * @param fgColor
      */
     private void print(String s, Color fgColor) {
-        StyledDocument sd = this.xTP_RX.getStyledDocument();
-        SimpleAttributeSet a = new SimpleAttributeSet();
-        StyleConstants.setForeground(a, fgColor);
-        try {
-            sd.insertString(sd.getLength(), s, a);
-            NeelSerUI.LOG.log(Level.FINER, "Got String: {0}", s);
-        } catch (BadLocationException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        }
+        this.RxDispQue.add(
+                new StringWithVisualStyle(s, fgColor));
+        NeelSerUI.LOG.log(Level.FINER, "Got String: {0}", s);
     }
 
     /**
@@ -86,16 +101,9 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
      * @param bgColor
      */
     private void print(String s, Color fgColor, Color bgColor) {
-        StyledDocument sd = this.xTP_RX.getStyledDocument();
-        SimpleAttributeSet a = new SimpleAttributeSet();
-        StyleConstants.setForeground(a, fgColor);
-        StyleConstants.setBackground(a, bgColor);
-        try {
-            sd.insertString(sd.getLength(), s, a);
-            NeelSerUI.LOG.log(Level.FINER, "Got String: {0}", s);
-        } catch (BadLocationException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        }
+        this.RxDispQue.add(
+                new StringWithVisualStyle(s, fgColor, bgColor));
+        NeelSerUI.LOG.log(Level.FINER, "Got String: {0}", s);
     }
 
     /**
@@ -140,7 +148,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     @Override
     public void gotRxData(byte[] arb) {
         if (this.nso.isPortOpen) {
-            System.out.println(arb.length);
+            this.println(new String(arb));
         }
     }
 
@@ -263,6 +271,12 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         xP_BasicSettings.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
 
         jLabel1.setText("Port");
+
+        xCB_Port.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                xCB_PortActionPerformed(evt);
+            }
+        });
 
         jLabel2.setText("Baud");
 
@@ -692,16 +706,16 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 if (this.nso.b_closePort()) {
                     NeelSerUI.LOG.log(Level.ALL, "Port {0} Closed",
                             this.nso.sPortName);
-                    this.println("Port "+
-                            this.nso.sPortName+" Closed",
+                    this.println("Port "
+                            + this.nso.sPortName + " Closed",
                             Color.MAGENTA);
                 }
             } catch (NeelSerException ser) {
                 NeelSerUI.LOG.log(Level.SEVERE,
                         "Got Exception in Closing port: {0}", ser.toString());
                 this.nso.isPortOpen = false;//Force Close
-                this.println("Error: Could not Close Port "+
-                            this.nso.sPortName,Color.RED);
+                this.println("Error: Could not Close Port "
+                        + this.nso.sPortName, Color.RED);
                 // Refresh Port List
                 this.v_updatePortList();
             }
@@ -713,8 +727,8 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 if (this.nso.b_openport(this)) {
                     NeelSerUI.LOG.log(Level.ALL, "Port {0} opened",
                             this.nso.sPortName);
-                    this.println("Port "+
-                            this.nso.sPortName+" Opened",
+                    this.println("Port "
+                            + this.nso.sPortName + " Opened",
                             Color.MAGENTA);
                     // Disable All controls and change the Name
                     this.xCB_Port.setEnabled(false);
@@ -727,13 +741,23 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
             } catch (NeelSerException ser) {
                 NeelSerUI.LOG.log(Level.SEVERE,
                         "Got Exception in Opening port: {0}", ser.toString());
-                this.println("Error: Could not Open Port "+
-                            this.nso.sPortName,Color.RED);
+                this.println("Error: Could not Open Port "
+                        + this.nso.sPortName, Color.RED);
                 // Refresh Port List
                 this.v_updatePortList();
             }
         }
     }//GEN-LAST:event_xB_OpenCloseActionPerformed
+
+    private void xCB_PortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xCB_PortActionPerformed
+        if((!this.nso.isPortOpen)&&
+                "Update".equals(xCB_Port.getSelectedItem().toString()))
+        {
+            this.v_updatePortList();
+            this.println("PortList updated",Color.BLUE);
+        }
+    }//GEN-LAST:event_xCB_PortActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
