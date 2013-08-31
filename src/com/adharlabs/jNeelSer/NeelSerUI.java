@@ -64,9 +64,11 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         this.xL_DSR.setOpaque(false);
         this.xL_RI.setOpaque(false);
         this.xL_RSLD.setOpaque(false);
+        this.xCK_DTR.setEnabled(false);
+        this.xCK_RTS.setEnabled(false);
 
         // Print Some Messages
-        this.println("Initialization Done! ... let the fun begin",Color.BLUE);
+        this.println("Initialization Done! ... let the fun begin", Color.BLUE);
     }
 
     /**
@@ -162,32 +164,38 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
 
     @Override
     public void changeDSR(boolean state) {
+        this.println("DSR: " + state, Color.ORANGE);
         this.xL_DSR.setOpaque(state);
     }
 
     @Override
     public void changeRI(boolean state) {
+        this.println("RI: " + state, Color.ORANGE);
         this.xL_RI.setOpaque(state);
     }
 
     @Override
     public void changeCTS(boolean state) {
+        this.println("CTS: " + state, Color.ORANGE);
         this.xL_CTS.setOpaque(state);
     }
 
     @Override
     public void changeRLSD(boolean state) {
+        this.println("RSLD: " + state, Color.ORANGE);
         this.xL_RSLD.setOpaque(state);
     }
 
     @Override
     public void gotBreak(boolean state) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.println("Got break Condiion on TX line", Color.ORANGE);
     }
 
     @Override
     public void notifyError(eNeelSerialStatus lvl, String from, String error) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.println("Error: \nfrom: " + from
+                + "\ninfo: " + error
+                + "\n Level: " + lvl.name() + " = " + lvl.toString(), Color.RED);
     }
     //</editor-fold>
 
@@ -372,8 +380,18 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         xP_ModemStatus.setBorder(javax.swing.BorderFactory.createTitledBorder("Modem Status"));
 
         xCK_DTR.setText("DTR");
+        xCK_DTR.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                xCK_DTRActionPerformed(evt);
+            }
+        });
 
         xCK_RTS.setText("RTS");
+        xCK_RTS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                xCK_RTSActionPerformed(evt);
+            }
+        });
 
         xL_DSR.setBackground(new java.awt.Color(0, 255, 0));
         xL_DSR.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -541,11 +559,17 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel8.setText("EndLine");
 
+        xT_Data2.setText("Not Implemented");
+
         xB_Data2_Send.setText("Send");
 
         xB_Data3_Send.setText("Send");
 
+        xT_Data3.setText("Not Implemented");
+
         xB_Data4_Send.setText("Send");
+
+        xT_Data4.setText("Not Implemented");
 
         xCB_Seq.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Not Implemented" }));
 
@@ -701,6 +725,8 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
             this.xCB_DataLen.setEnabled(true);
             this.xCB_Parity.setEnabled(true);
             this.xCB_HandShake.setEnabled(true);
+            this.xCK_DTR.setEnabled(false);
+            this.xCK_RTS.setEnabled(false);
             this.xB_OpenClose.setText("Port Open");
             try {
                 if (this.nso.b_closePort()) {
@@ -736,6 +762,8 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                     this.xCB_DataLen.setEnabled(false);
                     this.xCB_Parity.setEnabled(false);
                     this.xCB_HandShake.setEnabled(false);
+                    this.xCK_DTR.setEnabled(true);
+                    this.xCK_RTS.setEnabled(true);
                     this.xB_OpenClose.setText("Port Close");
                 }
             } catch (NeelSerException ser) {
@@ -750,13 +778,42 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     }//GEN-LAST:event_xB_OpenCloseActionPerformed
 
     private void xCB_PortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xCB_PortActionPerformed
-        if((!this.nso.isPortOpen)&&
-                "Update".equals(xCB_Port.getSelectedItem().toString()))
-        {
+        if ((!this.nso.isPortOpen)
+                && "Update".equals(xCB_Port.getSelectedItem().toString())) {
             this.v_updatePortList();
-            this.println("PortList updated",Color.BLUE);
+            this.println("PortList updated", Color.BLUE);
         }
     }//GEN-LAST:event_xCB_PortActionPerformed
+
+    private void xCK_DTRActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xCK_DTRActionPerformed
+        if(this.nso.isPortOpen)
+        {
+            try{
+            this.nso.b_DTR(this.xCK_DTR.isSelected());
+            }catch(NeelSerException ser)
+            {
+                NeelSerUI.LOG.log(Level.SEVERE,
+                        "Got Exception in Changing DTR state: {0}", ser.toString());
+                this.println("Error: Could not change DTR state "
+                        + this.xCK_DTR.isSelected(), Color.RED);
+            }
+        }
+    }//GEN-LAST:event_xCK_DTRActionPerformed
+
+    private void xCK_RTSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xCK_RTSActionPerformed
+        if(this.nso.isPortOpen)
+        {
+            try{
+            this.nso.b_RTS(this.xCK_RTS.isSelected());
+            }catch(NeelSerException ser)
+            {
+                NeelSerUI.LOG.log(Level.SEVERE,
+                        "Got Exception in Changing RTS state: {0}", ser.toString());
+                this.println("Error: Could not change RTS state "
+                        + this.xCK_DTR.isSelected(), Color.RED);
+            }
+        }
+    }//GEN-LAST:event_xCK_RTSActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;

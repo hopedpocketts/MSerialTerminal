@@ -475,11 +475,17 @@
                   <Properties>
                     <Property name="text" type="java.lang.String" value="DTR"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="xCK_DTRActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="xCK_RTS">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="RTS"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="xCK_RTSActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JLabel" name="xL_DSR">
                   <Properties>
@@ -781,6 +787,9 @@
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JTextField" name="xT_Data2">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Not Implemented"/>
+                  </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="xCK_Data2_Hex">
                 </Component>
@@ -801,6 +810,9 @@
                 <Component class="javax.swing.JCheckBox" name="xCK_Data3_Hex">
                 </Component>
                 <Component class="javax.swing.JTextField" name="xT_Data3">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Not Implemented"/>
+                  </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="xCK_Data4_Endl">
                 </Component>
@@ -812,6 +824,9 @@
                 <Component class="javax.swing.JCheckBox" name="xCK_Data4_Hex">
                 </Component>
                 <Component class="javax.swing.JTextField" name="xT_Data4">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Not Implemented"/>
+                  </Properties>
                 </Component>
                 <Component class="javax.swing.JComboBox" name="xCB_Seq">
                   <Properties>
