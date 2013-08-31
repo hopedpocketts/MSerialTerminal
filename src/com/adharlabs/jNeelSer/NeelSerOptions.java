@@ -647,6 +647,47 @@ public class NeelSerOptions {
         return false;
     }
 
+    public boolean b_RTS(boolean val) throws NeelSerException{
+        //Check if the Port is open
+        if(this.isPortOpen)
+        {
+            synchronized (this) {
+                try{
+                    this.bRTS = val;
+                    this.xPort.setRTS(val);
+                    return true;
+                }catch(SerialPortException ex)
+                {
+                    String s = "Error in RTS Change\n" + ex.toString();
+                    NeelSerOptions.LOG.warning(s);
+                    this.notifyAll();
+                    throw new NeelSerException(eNeelSerialStatus.ERROR_GEN, s);
+                }
+            }
+        }
+        return false;
+    }
+    
+    public boolean b_DTR(boolean val) throws NeelSerException{
+        //Check if the port is open
+        if(this.isPortOpen)
+        {
+            synchronized (this) {
+                try{
+                    this.bDTR = val;
+                    this.xPort.setDTR(val);
+                    return true;
+                }
+                catch(SerialPortException ex){
+                    String s = "Error in DTR Change\n" + ex.toString();
+                    NeelSerOptions.LOG.warning(s);
+                    this.notifyAll();
+                    throw new NeelSerException(eNeelSerialStatus.ERROR_GEN, s);
+                }
+            }
+        }
+        return false;
+    }
     /**
      *
      * @return @throws Exception
