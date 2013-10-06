@@ -15,43 +15,45 @@ import javax.swing.text.StyledDocument;
  *
  * @author nxp
  */
-public class ThreadedTextPaneHandler implements Runnable{
+public class ThreadedTextPaneHandler implements Runnable {
 
     private final JTextPane jp;
     private final BlockingQueue<StringWithVisualStyle> q;
     public boolean isEnabled;
     @SuppressWarnings("NonConstantLogger")
     private static Logger LOG;
-    
+
     public ThreadedTextPaneHandler(JTextPane j,
             BlockingQueue<StringWithVisualStyle> queue,
-            Logger log)
-    {
+            Logger log) {
         this.jp = j;
         this.q = queue;
         this.isEnabled = true;
         LOG = log;
         LOG.fine("Done Initialization");
     }
-    
+
     @Override
     public void run() {
-        while(isEnabled)
-        {
+        while (isEnabled) {
             try {
                 StringWithVisualStyle as = this.q.take();
                 StyledDocument sd = this.jp.getStyledDocument();
                 try {
-                    sd.insertString(sd.getLength(), as.s, as.a);
-                    LOG.log(Level.FINER,"Got String: {0}", as.s);
+                    if (as.s.equals("\b")) {
+                        if(sd.getLength()>1)
+                            sd.remove(sd.getLength()-1, 1);
+                    } else {
+                        sd.insertString(sd.getLength(), as.s, as.a);
+                    }
+                    //LOG.log(Level.FINER, "Got String: {0}", as.s);
                 } catch (BadLocationException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             } catch (InterruptedException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
-            
+
         }
     }
-    
 }
