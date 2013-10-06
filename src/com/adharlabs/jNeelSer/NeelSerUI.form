@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.3" maxVersion="1.8" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+<Form version="1.5" maxVersion="1.8" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
     <Component class="javax.swing.ButtonGroup" name="buttonGroup1">
     </Component>
@@ -360,7 +360,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="xRB_TXmode_Ascii" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="xRB_TXmode_Endl" max="32767" attributes="0"/>
+                          <Component id="xCB_TXmode_Endl" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -370,7 +370,7 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="xRB_TXmode_Ascii" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="xRB_TXmode_Hex" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="xRB_TXmode_Endl" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="xCB_TXmode_Endl" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace min="0" pref="9" max="32767" attributes="0"/>
                       </Group>
@@ -395,7 +395,7 @@
                     <Property name="text" type="java.lang.String" value="Hex"/>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JComboBox" name="xRB_TXmode_Endl">
+                <Component class="javax.swing.JComboBox" name="xCB_TXmode_Endl">
                   <Properties>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="3">
@@ -405,6 +405,9 @@
                       </StringArray>
                     </Property>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="xCB_TXmode_EndlActionPerformed"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>
@@ -589,6 +592,9 @@
           <SubComponents>
             <Component class="javax.swing.JTextPane" name="xTP_RX">
               <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Courier New" size="12" style="0"/>
+                </Property>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[315, 235]"/>
                 </Property>
@@ -759,6 +765,11 @@
               </Layout>
               <SubComponents>
                 <Component class="javax.swing.JTextField" name="xT_Data1">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Courier New" size="12" style="0"/>
+                    </Property>
+                  </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="xCK_Data1_Hex">
                 </Component>
@@ -766,6 +777,9 @@
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Send"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="xB_Data1_SendActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="xCK_Data1_Endl">
                 </Component>
@@ -788,7 +802,9 @@
                 </Component>
                 <Component class="javax.swing.JTextField" name="xT_Data2">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Not Implemented"/>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Courier New" size="12" style="0"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="xCK_Data2_Hex">
@@ -799,11 +815,17 @@
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Send"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="xB_Data2_SendActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JButton" name="xB_Data3_Send">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Send"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="xB_Data3_SendActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="xCK_Data3_Endl">
                 </Component>
@@ -811,7 +833,9 @@
                 </Component>
                 <Component class="javax.swing.JTextField" name="xT_Data3">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Not Implemented"/>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Courier New" size="12" style="0"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="xCK_Data4_Endl">
@@ -820,12 +844,17 @@
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Send"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="xB_Data4_SendActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="xCK_Data4_Hex">
                 </Component>
                 <Component class="javax.swing.JTextField" name="xT_Data4">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Not Implemented"/>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Courier New" size="12" style="0"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JComboBox" name="xCB_Seq">
@@ -835,21 +864,25 @@
                         <StringItem index="0" value="Not Implemented"/>
                       </StringArray>
                     </Property>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JButton" name="xB_LoadSeq">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Load Seq"/>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JButton" name="xB_SendSingleSeq">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Send Single"/>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JButton" name="xB_SendCompleteSeq">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Send Sequence"/>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
               </SubComponents>

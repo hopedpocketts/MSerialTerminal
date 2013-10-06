@@ -11,6 +11,8 @@ import java.util.logging.Logger;
 import com.adharlabs.UI.ThreadedTextPaneHandler;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * jNeelSer Serial User Interface
@@ -28,6 +30,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     private BlockingQueue<StringWithVisualStyle> RxDispQue;
     private ThreadedTextPaneHandler RxPaneHandler;
     private Thread RxPaneThread;
+    private String sEndl = "\r\n"; //Default CRLF
 
     /**
      * Creates new form NeelSerUI
@@ -59,8 +62,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         this.xL_DSR.setOpaque(false);
         this.xL_RI.setOpaque(false);
         this.xL_RSLD.setOpaque(false);
-        this.xCK_DTR.setEnabled(false);
-        this.xCK_RTS.setEnabled(false);
+        this.v_DisableDataEnableControls();
 
         // Print Some Messages
         this.println("Initialization Done! ... let the fun begin", Color.BLUE);
@@ -77,6 +79,36 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
             this.xCB_Port.addItem(object);
         }
         this.xCB_Port.addItem("Update");
+    }
+    
+    private void v_DisableDataEnableControls()
+    {        
+        this.xCB_Port.setEnabled(true);
+        this.xCB_Baud.setEnabled(true);
+        this.xCB_DataLen.setEnabled(true);
+        this.xCB_Parity.setEnabled(true);
+        this.xCB_HandShake.setEnabled(true);
+        this.xCK_DTR.setEnabled(false);
+        this.xCK_RTS.setEnabled(false);
+        this.xB_Data1_Send.setEnabled(false);
+        this.xB_Data2_Send.setEnabled(false);
+        this.xB_Data3_Send.setEnabled(false);
+        this.xB_Data4_Send.setEnabled(false);
+    }
+    
+    private void v_EnableDataDisableControls()
+    {
+        this.xCB_Port.setEnabled(false);
+        this.xCB_Baud.setEnabled(false);
+        this.xCB_DataLen.setEnabled(false);
+        this.xCB_Parity.setEnabled(false);
+        this.xCB_HandShake.setEnabled(false);
+        this.xCK_DTR.setEnabled(true);
+        this.xCK_RTS.setEnabled(true);
+        this.xB_Data1_Send.setEnabled(true);
+        this.xB_Data2_Send.setEnabled(true);
+        this.xB_Data3_Send.setEnabled(true);
+        this.xB_Data4_Send.setEnabled(true);
     }
 
     //<editor-fold defaultstate="collapsed" desc="Internal Prints">
@@ -107,7 +139,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
      *
      */
     private void println() {
-        this.print("\n", Color.BLACK, Color.WHITE);
+        this.print("\r\n", Color.BLACK, Color.WHITE);
     }
 
     /**
@@ -115,7 +147,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
      * @param s
      */
     private void println(String s) {
-        this.print(s+"\n", Color.BLACK);
+        this.print(s + "\r\n", Color.BLACK);
     }
 
     /**
@@ -124,7 +156,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
      * @param fgColor
      */
     private void println(String s, Color fgColor) {
-        this.print(s+"\n", fgColor);
+        this.print(s + "\r\n", fgColor);
     }
 
     /**
@@ -134,18 +166,132 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
      * @param bgColor
      */
     private void println(String s, Color fgColor, Color bgColor) {
-        this.print(s+"\n", fgColor, bgColor);
+        this.print(s + "\r\n", fgColor, bgColor);
     }
-    
-    private String hexstr(byte [] arr)
-    {
+
+    /**
+     *
+     * @param arr
+     * @return
+     */
+    private String hexstr(byte[] arr) {
         String s = "";
-        if(arr != null && arr.length > 0)
-        {
-            for(int i = 0; i< arr.length ;i++)
-            {
+        if (arr != null && arr.length > 0) {
+            for (int i = 0; i < arr.length; i++) {
                 s += String.format("[%02X]", arr[i]);
             }
+        }
+        return s;
+    }
+
+    /**
+     *
+     * @param arr
+     * @return
+     */
+    private String asciistr(byte[] arr, boolean special) {
+        String s = "";
+        if (arr != null && arr.length > 0) {
+            for (int i = 0; i < arr.length; i++) {
+                if ((arr[i] >= 32) && (arr[i] <= 126)){
+                    s += String.format("%c", arr[i]);
+                }else if(arr[i] == 0x0D||arr[i] == 0x0A)
+                {
+                    if((i+1)<arr.length && (arr[i] == 0x0D))
+                    {
+                        if(arr[i+1]==0x0A)
+                        {
+                            ++i;
+                        }
+                    }
+                    s += "\r\n";
+                }
+                else if(arr[i]==0x08 || arr[i]==0x7F)
+                {
+                    s += "\b";
+                }
+                else if (special) {
+                    s += String.format("[%02X]", arr[i]);
+                }
+            }
+        }
+        return s;
+    }
+
+    /**
+     *
+     * @param s
+     * @return
+     */
+    private String inlinehex(String s) {
+        String str = s;
+        int i = 0, k = 0;
+        while (i >= 0) {
+            i = str.indexOf("\\x", k);
+            if (i >= 0) {
+                Matcher m = Pattern.compile("\\\\x([\\da-fA-F]{2})").matcher(str.substring(i));
+                if (m.find()) {
+                    /*System.out.println("Matched: "+m.group(1)+ " Str :" + str );
+                     * System.out.println("Hex: "+Integer.parseInt(m.group(1), 16)+" Char: "+
+                     * Character.toString((char)Integer.parseInt(m.group(1), 16)));*/
+                    str = str.replaceFirst("\\\\x([\\da-fA-F]{2})",
+                            Character.toString((char) Integer.parseInt(m.group(1), 16)));
+                }
+            }
+            k = i + 1;
+        }
+        return str;
+    }
+
+    /**
+     *
+     * @param data
+     * @param isHex
+     * @param needEndl
+     * @return
+     */
+    private String processSendData(String data, boolean isHex, 
+            boolean needEndl) throws Exception {
+        String s = data;
+        // Hex Processing
+        if (isHex) {
+            // Filter out unnessary characters
+            s = s.replaceAll("[\\s\\\\x]|(0x)", "");
+            s = s.replaceAll("[^a-fA-F0-9]", "");
+            if((s.length()%2)!=0)
+            {
+                this.println();
+                this.print("Error the Hex Input has invalid lenght",Color.RED);
+                throw new Exception("Error the Hex Input has invalid lenght");
+            }
+            char [] arr = s.toCharArray();
+            s = "";
+            for(int i = 0;i<arr.length;i++)
+            {
+                s += Character.toString((char)Integer.parseInt(
+                        String.format("%c%c",arr[i],arr[i+1]), 16));
+                ++i;
+            }
+            this.println(this.hexstr(s.getBytes()), Color.BLACK);
+        } else { // Text Processing
+            //Default Processing for Escape Chars
+            s = s.replaceAll("\\\\r", Character.toString('\r'));
+            s = s.replaceAll("\\\\n", Character.toString('\n'));
+            s = s.replaceAll("\\\\b", Character.toString('\b'));
+            s = s.replaceAll("\\\\t", Character.toString('\t'));
+            s = s.replaceAll("\\\\f", Character.toString('\f'));
+            s = s.replaceAll("\\\\0", Character.toString('\0'));
+            s = s.replaceAll("\\\\\"", Character.toString('\"'));
+            s = s.replaceAll("\\\\\'", Character.toString('\''));
+            // Inline Hex
+            if (s.contains("\\x")) {
+                s = this.inlinehex(s);
+            }
+            // Endl if needed
+            if (needEndl) {
+                s += this.sEndl;
+            }
+            this.println(s, Color.BLACK);
         }
         return s;
     }
@@ -155,10 +301,13 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     @Override
     public void gotRxData(byte[] arb) {
         if (this.nso.isPortOpen) {
-            if(this.xRB_RXmode_Ascii.isSelected())
-                this.print(new String(arb), Color.BLACK);
-            else if(this.xRB_RXmode_Hex.isSelected())
-                this.print(this.hexstr(arb),Color.BLACK);
+            if (this.xRB_RXmode_Ascii.isSelected()) {
+                this.print(this.asciistr(arb, false), Color.BLACK);
+            } else if (this.xRB_RXmode_Mixed.isSelected()) {
+                this.print(this.asciistr(arb, true), Color.BLACK);
+            } else if (this.xRB_RXmode_Hex.isSelected()) {
+                this.print(this.hexstr(arb), Color.BLACK);
+            }
         }
     }
 
@@ -237,7 +386,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         xP_TXmodeSel = new javax.swing.JPanel();
         xRB_TXmode_Ascii = new javax.swing.JRadioButton();
         xRB_TXmode_Hex = new javax.swing.JRadioButton();
-        xRB_TXmode_Endl = new javax.swing.JComboBox();
+        xCB_TXmode_Endl = new javax.swing.JComboBox();
         xB_OpenClose = new javax.swing.JButton();
         xP_ModemStatus = new javax.swing.JPanel();
         xCK_DTR = new javax.swing.JCheckBox();
@@ -355,7 +504,12 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         buttonGroup2.add(xRB_TXmode_Hex);
         xRB_TXmode_Hex.setText("Hex");
 
-        xRB_TXmode_Endl.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "CrLf", "Cr", "Lf" }));
+        xCB_TXmode_Endl.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "CrLf", "Cr", "Lf" }));
+        xCB_TXmode_Endl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                xCB_TXmode_EndlActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout xP_TXmodeSelLayout = new javax.swing.GroupLayout(xP_TXmodeSel);
         xP_TXmodeSel.setLayout(xP_TXmodeSelLayout);
@@ -366,7 +520,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(xRB_TXmode_Ascii)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(xRB_TXmode_Endl, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(xCB_TXmode_Endl, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         xP_TXmodeSelLayout.setVerticalGroup(
             xP_TXmodeSelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -374,7 +528,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 .addGroup(xP_TXmodeSelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(xRB_TXmode_Ascii)
                     .addComponent(xRB_TXmode_Hex)
-                    .addComponent(xRB_TXmode_Endl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(xCB_TXmode_Endl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 9, Short.MAX_VALUE))
         );
 
@@ -544,6 +698,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         xSCP_Rx.setMinimumSize(new java.awt.Dimension(340, 320));
         xSCP_Rx.setPreferredSize(new java.awt.Dimension(340, 320));
 
+        xTP_RX.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
         xTP_RX.setMinimumSize(new java.awt.Dimension(315, 235));
         xTP_RX.setPreferredSize(new java.awt.Dimension(315, 330));
         xSCP_Rx.setViewportView(xTP_RX);
@@ -557,7 +712,14 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         xP_Tx.setMinimumSize(new java.awt.Dimension(315, 235));
         xP_Tx.setPreferredSize(new java.awt.Dimension(315, 235));
 
+        xT_Data1.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
+
         xB_Data1_Send.setText("Send");
+        xB_Data1_Send.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                xB_Data1_SendActionPerformed(evt);
+            }
+        });
 
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel6.setText("Data");
@@ -567,25 +729,44 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel8.setText("EndLine");
 
-        xT_Data2.setText("Not Implemented");
+        xT_Data2.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
 
         xB_Data2_Send.setText("Send");
+        xB_Data2_Send.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                xB_Data2_SendActionPerformed(evt);
+            }
+        });
 
         xB_Data3_Send.setText("Send");
+        xB_Data3_Send.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                xB_Data3_SendActionPerformed(evt);
+            }
+        });
 
-        xT_Data3.setText("Not Implemented");
+        xT_Data3.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
 
         xB_Data4_Send.setText("Send");
+        xB_Data4_Send.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                xB_Data4_SendActionPerformed(evt);
+            }
+        });
 
-        xT_Data4.setText("Not Implemented");
+        xT_Data4.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
 
         xCB_Seq.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Not Implemented" }));
+        xCB_Seq.setEnabled(false);
 
         xB_LoadSeq.setText("Load Seq");
+        xB_LoadSeq.setEnabled(false);
 
         xB_SendSingleSeq.setText("Send Single");
+        xB_SendSingleSeq.setEnabled(false);
 
         xB_SendCompleteSeq.setText("Send Sequence");
+        xB_SendCompleteSeq.setEnabled(false);
 
         javax.swing.GroupLayout xP_TxLayout = new javax.swing.GroupLayout(xP_Tx);
         xP_Tx.setLayout(xP_TxLayout);
@@ -727,14 +908,8 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     private void xB_OpenCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xB_OpenCloseActionPerformed
         if (this.nso.isPortOpen)//Close the Port
         {
-            // Enable Controls
-            this.xCB_Port.setEnabled(true);
-            this.xCB_Baud.setEnabled(true);
-            this.xCB_DataLen.setEnabled(true);
-            this.xCB_Parity.setEnabled(true);
-            this.xCB_HandShake.setEnabled(true);
-            this.xCK_DTR.setEnabled(false);
-            this.xCK_RTS.setEnabled(false);
+            // Enable Controls            
+            this.v_DisableDataEnableControls();
             this.xB_OpenClose.setText("Port Open");
             try {
                 if (this.nso.b_closePort()) {
@@ -765,13 +940,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                             + this.nso.sPortName + " Opened",
                             Color.MAGENTA);
                     // Disable All controls and change the Name
-                    this.xCB_Port.setEnabled(false);
-                    this.xCB_Baud.setEnabled(false);
-                    this.xCB_DataLen.setEnabled(false);
-                    this.xCB_Parity.setEnabled(false);
-                    this.xCB_HandShake.setEnabled(false);
-                    this.xCK_DTR.setEnabled(true);
-                    this.xCK_RTS.setEnabled(true);
+                    this.v_EnableDataDisableControls();
                     this.xB_OpenClose.setText("Port Close");
                 }
             } catch (NeelSerException ser) {
@@ -794,12 +963,10 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     }//GEN-LAST:event_xCB_PortActionPerformed
 
     private void xCK_DTRActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xCK_DTRActionPerformed
-        if(this.nso.isPortOpen)
-        {
-            try{
-            this.nso.b_DTR(this.xCK_DTR.isSelected());
-            }catch(NeelSerException ser)
-            {
+        if (this.nso.isPortOpen) {
+            try {
+                this.nso.b_DTR(this.xCK_DTR.isSelected());
+            } catch (NeelSerException ser) {
                 NeelSerUI.LOG.log(Level.SEVERE,
                         "Got Exception in Changing DTR state: {0}", ser.toString());
                 this.println("Error: Could not change DTR state "
@@ -809,12 +976,10 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     }//GEN-LAST:event_xCK_DTRActionPerformed
 
     private void xCK_RTSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xCK_RTSActionPerformed
-        if(this.nso.isPortOpen)
-        {
-            try{
-            this.nso.b_RTS(this.xCK_RTS.isSelected());
-            }catch(NeelSerException ser)
-            {
+        if (this.nso.isPortOpen) {
+            try {
+                this.nso.b_RTS(this.xCK_RTS.isSelected());
+            } catch (NeelSerException ser) {
                 NeelSerUI.LOG.log(Level.SEVERE,
                         "Got Exception in Changing RTS state: {0}", ser.toString());
                 this.println("Error: Could not change RTS state "
@@ -823,6 +988,107 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         }
     }//GEN-LAST:event_xCK_RTSActionPerformed
 
+    private void xB_Data1_SendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xB_Data1_SendActionPerformed
+        String s = this.xT_Data1.getText();
+        if (s.length() > 0) {
+            // Process the Data
+            try {
+                s = this.processSendData(s,
+                        this.xCK_Data1_Hex.isSelected(),
+                        this.xCK_Data1_Endl.isSelected());
+            } catch (Exception ex) {
+                NeelSerUI.LOG.log(Level.SEVERE, "Got Exception Processing data [1]: {0}", ex.toString());
+                this.println("Error: Could not Process Data[1] ", Color.RED);
+                return;
+            }
+            // Send the Data
+            try {
+                this.nso.b_SendBytes(s.getBytes());
+            } catch (NeelSerException ser) {
+                NeelSerUI.LOG.log(Level.SEVERE, "Got Exception Sending data [1]: {0}", ser.toString());
+                this.println("Error: Could Send Data[1] ", Color.RED);
+            }
+        }
+    }//GEN-LAST:event_xB_Data1_SendActionPerformed
+
+    private void xB_Data2_SendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xB_Data2_SendActionPerformed
+        String s = this.xT_Data2.getText();
+        if (s.length() > 0) {
+            // Process the Data
+            try {
+                s = this.processSendData(s,
+                        this.xCK_Data2_Hex.isSelected(),
+                        this.xCK_Data2_Endl.isSelected());
+            } catch (Exception ex) {
+                NeelSerUI.LOG.log(Level.SEVERE, "Got Exception Processing data [2]: {0}", ex.toString());
+                this.println("Error: Could not Process Data[2] ", Color.RED);
+                return;
+            }
+            // Send the Data
+            try {
+                this.nso.b_SendBytes(s.getBytes());
+            } catch (NeelSerException ser) {
+                NeelSerUI.LOG.log(Level.SEVERE, "Got Exception Sending data [2]: {0}", ser.toString());
+                this.println("Error: Could Send Data[2] ", Color.RED);
+            }
+        }
+    }//GEN-LAST:event_xB_Data2_SendActionPerformed
+
+    private void xB_Data3_SendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xB_Data3_SendActionPerformed
+        String s = this.xT_Data3.getText();
+        if (s.length() > 0) {
+            // Process the Data
+            try {
+                s = this.processSendData(s,
+                        this.xCK_Data3_Hex.isSelected(),
+                        this.xCK_Data3_Endl.isSelected());
+            } catch (Exception ex) {
+                NeelSerUI.LOG.log(Level.SEVERE, "Got Exception Processing data [3]: {0}", ex.toString());
+                this.println("Error: Could not Process Data[3] ", Color.RED);
+                return;
+            }
+            // Send the Data
+            try {
+                this.nso.b_SendBytes(s.getBytes());
+            } catch (NeelSerException ser) {
+                NeelSerUI.LOG.log(Level.SEVERE, "Got Exception Sending data [3]: {0}", ser.toString());
+                this.println("Error: Could Send Data[3] ", Color.RED);
+            }
+        }
+    }//GEN-LAST:event_xB_Data3_SendActionPerformed
+
+    private void xB_Data4_SendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xB_Data4_SendActionPerformed
+        String s = this.xT_Data4.getText();
+        if (s.length() > 0) {
+            // Process the Data
+            try {
+                s = this.processSendData(s,
+                        this.xCK_Data4_Hex.isSelected(),
+                        this.xCK_Data4_Endl.isSelected());
+            } catch (Exception ex) {
+                NeelSerUI.LOG.log(Level.SEVERE, "Got Exception Processing data [4]: {0}", ex.toString());
+                this.println("Error: Could not Process Data[4] ", Color.RED);
+                return;
+            }
+            // Send the Data
+            try {
+                this.nso.b_SendBytes(s.getBytes());
+            } catch (NeelSerException ser) {
+                NeelSerUI.LOG.log(Level.SEVERE, "Got Exception Sending data [4]: {0}", ser.toString());
+                this.println("Error: Could Send Data[4] ", Color.RED);
+            }
+        }
+    }//GEN-LAST:event_xB_Data4_SendActionPerformed
+
+    private void xCB_TXmode_EndlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xCB_TXmode_EndlActionPerformed
+        if ("Cr".equalsIgnoreCase(this.xCB_TXmode_Endl.getSelectedItem().toString())) {
+            this.sEndl = "\r";
+        } else if ("Lf".equalsIgnoreCase(this.xCB_TXmode_Endl.getSelectedItem().toString())) {
+            this.sEndl = "\n";
+        } else { //Default Case
+            this.sEndl = "\r\n";
+        }
+    }//GEN-LAST:event_xCB_TXmode_EndlActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
@@ -848,6 +1114,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     private javax.swing.JComboBox xCB_Parity;
     private javax.swing.JComboBox xCB_Port;
     private javax.swing.JComboBox xCB_Seq;
+    private javax.swing.JComboBox xCB_TXmode_Endl;
     private javax.swing.JCheckBox xCK_DTR;
     private javax.swing.JCheckBox xCK_Data1_Endl;
     private javax.swing.JCheckBox xCK_Data1_Hex;
@@ -873,7 +1140,6 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     private javax.swing.JRadioButton xRB_RXmode_Hex;
     private javax.swing.JRadioButton xRB_RXmode_Mixed;
     private javax.swing.JRadioButton xRB_TXmode_Ascii;
-    private javax.swing.JComboBox xRB_TXmode_Endl;
     private javax.swing.JRadioButton xRB_TXmode_Hex;
     private javax.swing.JScrollPane xSCP_Rx;
     private javax.swing.JScrollPane xSCP_Tx;
