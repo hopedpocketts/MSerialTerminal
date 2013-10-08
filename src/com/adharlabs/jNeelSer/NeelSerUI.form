@@ -139,7 +139,11 @@
                                           <Component id="xCB_HandShake" max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
-                                  <Component id="xB_OpenClose" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="xB_OpenClose" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="xB_UpdatePorts" min="-2" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
@@ -182,7 +186,10 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="xP_TXmodeSel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="xB_OpenClose" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="xB_OpenClose" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="xB_UpdatePorts" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="xP_ModemStatus" min="-2" max="-2" attributes="0"/>
                       <EmptySpace pref="131" max="32767" attributes="0"/>
@@ -202,9 +209,6 @@
                   <StringArray count="0"/>
                 </Property>
               </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="xCB_PortActionPerformed"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel2">
               <Properties>
@@ -548,6 +552,14 @@
                 </Component>
               </SubComponents>
             </Container>
+            <Component class="javax.swing.JButton" name="xB_UpdatePorts">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Update Ports"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="xB_UpdatePortsActionPerformed"/>
+              </Events>
+            </Component>
           </SubComponents>
         </Container>
       </SubComponents>
