@@ -72,8 +72,15 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
      * Function to update the Port List Combo box
      */
     private void v_updatePortList() {
-        // Refresh Port List
-        this.nso.v_refreshPortList();
+        // Refresh Port List        
+        try {
+            this.nso.v_refreshPortList();
+        } catch (Exception e) {
+            NeelSerUI.LOG.log(Level.SEVERE,
+                    "Got Exception in Updating port list: {0}", e.toString());
+            this.println("Error: Could not Update Port List ", Color.RED);
+            return;
+        }        
         this.xCB_Port.removeAllItems();
         for (Object object : nso.arsPortList) {
             this.xCB_Port.addItem(object);
@@ -924,9 +931,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                         "Got Exception in Closing port: {0}", ser.toString());
                 this.nso.isPortOpen = false;//Force Close
                 this.println("Error: Could not Close Port "
-                        + this.nso.sPortName, Color.RED);
-                // Refresh Port List
-                this.v_updatePortList();
+                        + this.nso.sPortName, Color.RED);   
             }
         } else //Open the Port
         {
@@ -948,8 +953,6 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                         "Got Exception in Opening port: {0}", ser.toString());
                 this.println("Error: Could not Open Port "
                         + this.nso.sPortName, Color.RED);
-                // Refresh Port List
-                this.v_updatePortList();
             }
         }
     }//GEN-LAST:event_xB_OpenCloseActionPerformed
