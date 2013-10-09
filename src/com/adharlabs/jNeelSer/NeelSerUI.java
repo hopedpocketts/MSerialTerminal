@@ -22,16 +22,23 @@ import java.util.regex.Pattern;
  */
 public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterface {
 
+    //<editor-fold defaultstate="collapsed" desc="Constant Data">
     public final String sProduct = "jNeelSerial";
     public final String sCompany = "A.D.H.A.R Labs Research, Bharat(India)";
+    //</editor-fold>
+    
     @SuppressWarnings("NonConstantLogger")
     private static Logger LOG;
+    
+    //<editor-fold defaultstate="collapsed" desc="Private Data Vars">
     private NeelSerOptions nso;
     private BlockingQueue<StringWithVisualStyle> RxDispQue;
     private ThreadedTextPaneHandler RxPaneHandler;
     private Thread RxPaneThread;
     private String sEndl = "\r\n"; //Default CRLF
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Constructor">
     /**
      * Creates new form NeelSerUI
      */
@@ -39,40 +46,42 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     public NeelSerUI(Logger log) {
         NeelSerUI.LOG = log;
         initComponents();
-
+        
         //Set the title
         super.setTitle(sProduct + " by " + sCompany);
-
+        
         //Initializae the Options base
         nso = new NeelSerOptions(true, NeelSerUI.LOG);
-
+        
         //Get Ports
         this.v_updatePortList();
-
+        
         // Create the RX Queue and Assign the Handler
         this.RxDispQue = new LinkedBlockingQueue<StringWithVisualStyle>();
         this.RxPaneHandler = new ThreadedTextPaneHandler(xTP_RX, RxDispQue, log);
-
+        
         // Run the RX TextPane Thread
         this.RxPaneThread = new Thread(this.RxPaneHandler, "RX TextPane Thread");
         this.RxPaneThread.start();
-
+        
         //Initialize items
         this.xL_CTS.setOpaque(false);
         this.xL_DSR.setOpaque(false);
         this.xL_RI.setOpaque(false);
         this.xL_RSLD.setOpaque(false);
         this.v_DisableDataEnableControls();
-
+        
         // Print Some Messages
         this.println("Initialization Done! ... let the fun begin", Color.BLUE);
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Internal Functions">
     /**
      * Function to update the Port List Combo box
      */
     private void v_updatePortList() {
-        // Refresh Port List        
+        // Refresh Port List
         try {
             this.nso.v_refreshPortList();
         } catch (Exception e) {
@@ -87,7 +96,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         }
         this.xCB_Port.addItem("Update");
     }
-
+    
     private void v_DisableDataEnableControls() {
         this.xCB_Port.setEnabled(true);
         this.xCB_Baud.setEnabled(true);
@@ -95,16 +104,13 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         this.xCB_Parity.setEnabled(true);
         this.xCB_HandShake.setEnabled(true);
         this.xB_UpdatePorts.setEnabled(true);
-        this.xB_CustBaudAdd.setEnabled(true);
         this.xT_CustBaud.setEnabled(true);
-        this.xCK_DTR.setEnabled(false);
-        this.xCK_RTS.setEnabled(false);
         this.xB_Data1_Send.setEnabled(false);
         this.xB_Data2_Send.setEnabled(false);
         this.xB_Data3_Send.setEnabled(false);
         this.xB_Data4_Send.setEnabled(false);
     }
-
+    
     private void v_EnableDataDisableControls() {
         this.xCB_Port.setEnabled(false);
         this.xCB_Baud.setEnabled(false);
@@ -112,15 +118,26 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         this.xCB_Parity.setEnabled(false);
         this.xCB_HandShake.setEnabled(false);
         this.xB_UpdatePorts.setEnabled(false);
-        this.xB_CustBaudAdd.setEnabled(false);
         this.xT_CustBaud.setEnabled(false);
-        this.xCK_DTR.setEnabled(true);
-        this.xCK_RTS.setEnabled(true);
         this.xB_Data1_Send.setEnabled(true);
         this.xB_Data2_Send.setEnabled(true);
         this.xB_Data3_Send.setEnabled(true);
         this.xB_Data4_Send.setEnabled(true);
     }
+    
+    private void v_InterpretValues(){
+        this.nso.iBaudrate = Integer.parseInt(
+                this.xCB_Baud.getSelectedItem().toString());
+        this.nso.iDataBits = Integer.parseInt(
+                this.xCB_DataLen.getSelectedItem().toString());
+        this.print("BAUD: "+this.nso.iBaudrate,Color.LIGHT_GRAY);
+        this.print("DataLen: "+this.nso.iDataBits,Color.LIGHT_GRAY);
+        this.print("Parity: "+
+                this.xCB_Parity.getSelectedItem().toString(),Color.LIGHT_GRAY);
+        this.print("HandShake: "+
+                this.xCB_HandShake.getSelectedItem().toString(),Color.LIGHT_GRAY);
+    }
+    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Internal Prints">
     /**
@@ -398,10 +415,12 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         xL_CTS = new javax.swing.JLabel();
         xL_RI = new javax.swing.JLabel();
         xL_RSLD = new javax.swing.JLabel();
+        xB_SendBreak = new javax.swing.JButton();
         xB_UpdatePorts = new javax.swing.JButton();
-        jLabel9 = new javax.swing.JLabel();
         xT_CustBaud = new javax.swing.JFormattedTextField();
-        xB_CustBaudAdd = new javax.swing.JButton();
+        xCK_CustomBaud = new javax.swing.JCheckBox();
+        jLabel9 = new javax.swing.JLabel();
+        xCB_StopBits = new javax.swing.JComboBox();
         xSP_IO = new javax.swing.JSplitPane();
         xSCP_Rx = new javax.swing.JScrollPane();
         xTP_RX = new javax.swing.JTextPane();
@@ -581,6 +600,8 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         xL_RSLD.setText("RSLD");
         xL_RSLD.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
 
+        xB_SendBreak.setText("Break");
+
         javax.swing.GroupLayout xP_ModemStatusLayout = new javax.swing.GroupLayout(xP_ModemStatus);
         xP_ModemStatus.setLayout(xP_ModemStatusLayout);
         xP_ModemStatusLayout.setHorizontalGroup(
@@ -590,32 +611,34 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 .addGroup(xP_ModemStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(xP_ModemStatusLayout.createSequentialGroup()
                         .addComponent(xL_DSR, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(xL_CTS, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(xL_RI, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, xP_ModemStatusLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(xL_RI, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(xL_RSLD, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(xP_ModemStatusLayout.createSequentialGroup()
                         .addComponent(xCK_DTR)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(xCK_RTS)
-                        .addGap(18, 18, 18)
-                        .addComponent(xL_RSLD, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(xB_SendBreak)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         xP_ModemStatusLayout.setVerticalGroup(
             xP_ModemStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(xP_ModemStatusLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(xP_ModemStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(xCK_DTR, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(xCK_RTS)
-                    .addComponent(xL_RSLD))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(xB_SendBreak))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(xP_ModemStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(xL_DSR)
                     .addComponent(xL_CTS)
-                    .addComponent(xL_RI))
-                .addContainerGap())
+                    .addComponent(xL_RI)
+                    .addComponent(xL_RSLD))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         xB_UpdatePorts.setText("Update Ports");
@@ -625,17 +648,14 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
             }
         });
 
-        jLabel9.setText("Custom Baud");
-
         xT_CustBaud.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0"))));
         xT_CustBaud.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
 
-        xB_CustBaudAdd.setText("Add");
-        xB_CustBaudAdd.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                xB_CustBaudAddActionPerformed(evt);
-            }
-        });
+        xCK_CustomBaud.setText("Custom Baud");
+
+        jLabel9.setText("Stop Bits");
+
+        xCB_StopBits.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1", "1.5", "2" }));
 
         javax.swing.GroupLayout xP_BasicSettingsLayout = new javax.swing.GroupLayout(xP_BasicSettings);
         xP_BasicSettings.setLayout(xP_BasicSettingsLayout);
@@ -646,43 +666,41 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(xP_RXmodeSel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(xP_TXmodeSel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(xP_ModemStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(xP_ModemStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 186, Short.MAX_VALUE)
                     .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
                         .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
-                                    .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, xP_BasicSettingsLayout.createSequentialGroup()
-                                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
-                                        .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
-                                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addGap(8, 8, 8)))
-                                    .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                        .addComponent(xCB_Baud, 0, 152, Short.MAX_VALUE)
-                                        .addComponent(xCB_Port, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                                .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(xCB_DataLen, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(xCB_Parity, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, xP_BasicSettingsLayout.createSequentialGroup()
-                                    .addComponent(jLabel5)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(xCB_HandShake, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                             .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
                                 .addComponent(xB_OpenClose)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(xB_UpdatePorts))
                             .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
-                                .addComponent(jLabel9)
+                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(xT_CustBaud, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(xCB_HandShake, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(xB_CustBaudAdd)))
+                                .addComponent(xCB_Parity, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
+                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(xCB_DataLen, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
+                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(xCB_Baud, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(xCB_Port, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
+                                .addComponent(xT_CustBaud, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(xCK_CustomBaud))
+                            .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
+                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(xCB_StopBits, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -693,24 +711,27 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(xCB_Port, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(xCB_Baud, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9)
                     .addComponent(xT_CustBaud, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(xB_CustBaudAdd))
+                    .addComponent(xCK_CustomBaud))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(xCB_StopBits, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(xCB_DataLen, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(xCB_Parity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(xCB_HandShake, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -724,7 +745,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                     .addComponent(xB_UpdatePorts))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(xP_ModemStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(107, Short.MAX_VALUE))
+                .addContainerGap(108, Short.MAX_VALUE))
         );
 
         xTP_SettingPane.addTab("Basic Settings", xP_BasicSettings);
@@ -969,6 +990,8 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
             }
         } else //Open the Port
         {
+            // Interpret Values
+            this.v_InterpretValues();
             // Get the Current Selected Port
             this.nso.iSelectedPortIndex = this.xCB_Port.getSelectedIndex();
             try {
@@ -1123,10 +1146,6 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         this.v_updatePortList();
     }//GEN-LAST:event_xB_UpdatePortsActionPerformed
 
-    private void xB_CustBaudAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xB_CustBaudAddActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_xB_CustBaudAddActionPerformed
-
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         if(this.nso.isPortOpen)
             this.xB_OpenClose.doClick();
@@ -1144,13 +1163,13 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JButton xB_CustBaudAdd;
     private javax.swing.JButton xB_Data1_Send;
     private javax.swing.JButton xB_Data2_Send;
     private javax.swing.JButton xB_Data3_Send;
     private javax.swing.JButton xB_Data4_Send;
     private javax.swing.JButton xB_LoadSeq;
     private javax.swing.JButton xB_OpenClose;
+    private javax.swing.JButton xB_SendBreak;
     private javax.swing.JButton xB_SendCompleteSeq;
     private javax.swing.JButton xB_SendSingleSeq;
     private javax.swing.JButton xB_UpdatePorts;
@@ -1160,7 +1179,9 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     private javax.swing.JComboBox xCB_Parity;
     private javax.swing.JComboBox xCB_Port;
     private javax.swing.JComboBox xCB_Seq;
+    private javax.swing.JComboBox xCB_StopBits;
     private javax.swing.JComboBox xCB_TXmode_Endl;
+    private javax.swing.JCheckBox xCK_CustomBaud;
     private javax.swing.JCheckBox xCK_DTR;
     private javax.swing.JCheckBox xCK_Data1_Endl;
     private javax.swing.JCheckBox xCK_Data1_Hex;
