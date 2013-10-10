@@ -26,10 +26,8 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     public final String sProduct = "jNeelSerial";
     public final String sCompany = "A.D.H.A.R Labs Research, Bharat(India)";
     //</editor-fold>
-    
     @SuppressWarnings("NonConstantLogger")
     private static Logger LOG;
-    
     //<editor-fold defaultstate="collapsed" desc="Private Data Vars">
     private NeelSerOptions nso;
     private BlockingQueue<StringWithVisualStyle> RxDispQue;
@@ -46,31 +44,31 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     public NeelSerUI(Logger log) {
         NeelSerUI.LOG = log;
         initComponents();
-        
+
         //Set the title
         super.setTitle(sProduct + " by " + sCompany);
-        
+
         //Initializae the Options base
         nso = new NeelSerOptions(true, NeelSerUI.LOG);
-        
+
         //Get Ports
         this.v_updatePortList();
-        
+
         // Create the RX Queue and Assign the Handler
         this.RxDispQue = new LinkedBlockingQueue<StringWithVisualStyle>();
         this.RxPaneHandler = new ThreadedTextPaneHandler(xTP_RX, RxDispQue, log);
-        
+
         // Run the RX TextPane Thread
         this.RxPaneThread = new Thread(this.RxPaneHandler, "RX TextPane Thread");
         this.RxPaneThread.start();
-        
+
         //Initialize items
         this.xL_CTS.setOpaque(false);
         this.xL_DSR.setOpaque(false);
         this.xL_RI.setOpaque(false);
         this.xL_RSLD.setOpaque(false);
         this.v_DisableDataEnableControls();
-        
+
         // Print Some Messages
         this.println("Initialization Done! ... let the fun begin", Color.BLUE);
     }
@@ -96,7 +94,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         }
         this.xCB_Port.addItem("Update");
     }
-    
+
     private void v_DisableDataEnableControls() {
         this.xCB_Port.setEnabled(true);
         this.xCB_Baud.setEnabled(true);
@@ -105,12 +103,14 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         this.xCB_HandShake.setEnabled(true);
         this.xB_UpdatePorts.setEnabled(true);
         this.xT_CustBaud.setEnabled(true);
+        this.xCK_CustomBaud.setEnabled(true);
+        this.xCB_StopBits.setEnabled(true);
         this.xB_Data1_Send.setEnabled(false);
         this.xB_Data2_Send.setEnabled(false);
         this.xB_Data3_Send.setEnabled(false);
         this.xB_Data4_Send.setEnabled(false);
     }
-    
+
     private void v_EnableDataDisableControls() {
         this.xCB_Port.setEnabled(false);
         this.xCB_Baud.setEnabled(false);
@@ -119,23 +119,92 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         this.xCB_HandShake.setEnabled(false);
         this.xB_UpdatePorts.setEnabled(false);
         this.xT_CustBaud.setEnabled(false);
+        this.xCK_CustomBaud.setEnabled(false);
+        this.xCB_StopBits.setEnabled(false);
         this.xB_Data1_Send.setEnabled(true);
         this.xB_Data2_Send.setEnabled(true);
         this.xB_Data3_Send.setEnabled(true);
         this.xB_Data4_Send.setEnabled(true);
     }
-    
-    private void v_InterpretValues(){
-        this.nso.iBaudrate = Integer.parseInt(
-                this.xCB_Baud.getSelectedItem().toString());
+
+    private void v_InterpretValues() throws Exception {
+        int val;
+        String s;
+        // Derive Baud Rate        
+        if (this.xCK_CustomBaud.isSelected()) {
+
+            // Error Condition
+            if (this.xT_CustBaud.getText().length() < 3) {
+                this.print("\nError No or too small custom baud rate", Color.RED);
+                throw new Exception("Error No or too small custom baud rate ");
+            }
+            val = Integer.parseInt(
+                    this.xT_CustBaud.getText());
+            if (val <= 0) {
+                this.print("\nError Invalid custom baud rate", Color.RED);
+                throw new Exception("Error Invalid custom baud rate " + val);
+            }
+        } else {
+            this.xCK_CustomBaud.setSelected(false);
+            val = Integer.parseInt(
+                    this.xCB_Baud.getSelectedItem().toString());
+        }
+        // Assign Baud Rate
+        this.nso.iBaudrate = val;
+        this.print("\n BAUD: " + this.nso.iBaudrate, Color.LIGHT_GRAY);
+        // Assign Data Bits Lenght
         this.nso.iDataBits = Integer.parseInt(
                 this.xCB_DataLen.getSelectedItem().toString());
-        this.print("BAUD: "+this.nso.iBaudrate,Color.LIGHT_GRAY);
-        this.print("DataLen: "+this.nso.iDataBits,Color.LIGHT_GRAY);
-        this.print("Parity: "+
-                this.xCB_Parity.getSelectedItem().toString(),Color.LIGHT_GRAY);
-        this.print("HandShake: "+
-                this.xCB_HandShake.getSelectedItem().toString(),Color.LIGHT_GRAY);
+        this.print("\n DataLen: " + this.nso.iDataBits, Color.LIGHT_GRAY);
+        // Derive Stop Bits
+        s = this.xCB_StopBits.getSelectedItem().toString();
+        // Assign Stop Bits
+        if ("1".equals(s)) {
+            this.nso.iStopBits = 1;
+            this.print("\n Stop Bits: 1", Color.LIGHT_GRAY);
+        } else if ("1.5".equals(s)) {
+            this.nso.iStopBits = 3;
+            this.print("\n Stop Bits: 1.5", Color.LIGHT_GRAY);
+        } else if ("2".equals(s)) {
+            this.nso.iStopBits = 2;
+            this.print("\n Stop Bits: 2", Color.LIGHT_GRAY);
+        }
+        // Derive Parity
+        s = this.xCB_Parity.getSelectedItem().toString();
+        // Assign Parity
+        if ("none".equals(s)) {
+            this.nso.iParity = 0;
+            this.print("\n Parity: None", Color.LIGHT_GRAY);
+        } else if ("even".equals(s)) {
+            this.nso.iParity = 2;
+            this.print("\n Parity: Even", Color.LIGHT_GRAY);
+        } else if ("odd".equals(s)) {
+            this.nso.iParity = 1;
+            this.print("\n Parity: Odd", Color.LIGHT_GRAY);
+        } else if ("mark".equals(s)) {
+            this.nso.iParity = 3;
+            this.print("\n Parity: Mark", Color.LIGHT_GRAY);
+        } else if ("space".equals(s)) {
+            this.nso.iParity = 4;
+            this.print("\n Parity: Space", Color.LIGHT_GRAY);
+        }
+        // Derive Handshake
+        s = this.xCB_HandShake.getSelectedItem().toString();
+        // Assign Handshake 
+        if ("off".equals(s)) {
+            this.nso.iFlowControl = 0;
+            this.print("\n Handshake: Off", Color.LIGHT_GRAY);
+        } else if ("CTS/RTS".equals(s)) {
+            this.nso.iFlowControl = 3;
+            this.print("\n Handshake: CTS/RTS", Color.LIGHT_GRAY);
+        } else if ("Xon/Xoff".equals(s)) {
+            this.nso.iFlowControl = 0x0C;
+            this.print("\n Handshake: Xon/Xoff", Color.LIGHT_GRAY);
+        }
+        // Assign State for RTS and DTR
+        this.nso.bDTR = this.xCK_DTR.isSelected();
+        this.nso.bRTS = this.xCK_RTS.isSelected();
+        this.println();
     }
     //</editor-fold>
 
@@ -477,7 +546,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
 
         xCB_DataLen.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "8", "7" }));
 
-        xCB_Parity.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "none", "even", "odd", "mark" }));
+        xCB_Parity.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "none", "even", "odd", "mark", "space" }));
 
         jLabel4.setText("Parity");
 
@@ -649,6 +718,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         });
 
         xT_CustBaud.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0"))));
+        xT_CustBaud.setText("9600");
         xT_CustBaud.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
 
         xCK_CustomBaud.setText("Custom Baud");
@@ -991,7 +1061,13 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         } else //Open the Port
         {
             // Interpret Values
-            this.v_InterpretValues();
+            try {
+                this.v_InterpretValues();
+            } catch (Exception ex) {
+                NeelSerUI.LOG.log(Level.WARNING,
+                        "Got Exception in Opening port: {0}", ex.toString());
+                return;
+            }
             // Get the Current Selected Port
             this.nso.iSelectedPortIndex = this.xCB_Port.getSelectedIndex();
             try {
@@ -1147,10 +1223,10 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     }//GEN-LAST:event_xB_UpdatePortsActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-        if(this.nso.isPortOpen)
+        if (this.nso.isPortOpen) {
             this.xB_OpenClose.doClick();
+        }
     }//GEN-LAST:event_formWindowClosing
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
