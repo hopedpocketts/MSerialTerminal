@@ -226,7 +226,7 @@ public class NeelSerOptions {
 
         // Initialize the Parameters
         this.arsPortList = SerialPortList.getPortNames();
-        this.sPortName = this.arsPortList[0];
+        this.sPortName = "";
         this.iSelectedPortIndex = 0;
         this.isPortOpen = false;
         this.iBaudrate = SerialPort.BAUDRATE_9600;
@@ -316,18 +316,6 @@ public class NeelSerOptions {
 
         //Get Interface
         this.iface = iface;
-
-        // Get the serial port name using the index
-        try {
-            this.sPortName = this.arsPortList[this.iSelectedPortIndex];
-        } catch (ArrayIndexOutOfBoundsException ex1) {
-            String s = "Access to Port list array caused "
-                    + "issue due to invalid index("
-                    + this.iSelectedPortIndex + ")\n" + ex1.toString();
-            NeelSerOptions.LOG.log(Level.WARNING, s);
-            throw new NeelSerException(
-                    eNeelSerialStatus.ERROR_PORTLISTARRAY_ACCESS, s);
-        }
 
         synchronized (this) {
             //Create the Serial Port
