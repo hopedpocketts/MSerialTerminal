@@ -46,6 +46,8 @@ public class ThreadedTextPaneHandler implements Runnable {
                     } else {
                         sd.insertString(sd.getLength(), as.s, as.a);
                     }
+                    // Update the Carret Position
+                    this.jp.setCaretPosition(sd.getLength());
                     //LOG.log(Level.FINER, "Got String: {0}", as.s);
                 } catch (BadLocationException ex) {
                     LOG.log(Level.SEVERE, null, ex);
