@@ -25,6 +25,12 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     //<editor-fold defaultstate="collapsed" desc="Constant Data">
     public final String sProduct = "jNeelSerial";
     public final String sCompany = "A.D.H.A.R Labs Research, Bharat(India)";
+    private final Color xColor_Receive = Color.BLUE;
+    private final Color xColor_Send = Color.GRAY;
+    private final Color xColor_Notice = Color.DARK_GRAY;
+    private final Color xColor_Status = Color.ORANGE;
+    private final Color xColor_Error = Color.RED;
+    private final Color xColor_Special = Color.MAGENTA;
     //</editor-fold>
     @SuppressWarnings("NonConstantLogger")
     private static Logger LOG;
@@ -50,7 +56,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
 
         //Initializae the Options base
         nso = new NeelSerOptions(true, NeelSerUI.LOG);
-        
+
         // Create the RX Queue and Assign the Handler
         this.RxDispQue = new LinkedBlockingQueue<StringWithVisualStyle>();
         this.RxPaneHandler = new ThreadedTextPaneHandler(xTP_RX, RxDispQue, log);
@@ -70,7 +76,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         this.v_updatePortList();
 
         // Print Some Messages
-        this.println("Initialization Done! ... let the fun begin", Color.BLUE);
+        this.println("Initialization Done! ... let the fun begin", this.xColor_Notice);
     }
     //</editor-fold>
 
@@ -85,18 +91,18 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         } catch (Exception e) {
             NeelSerUI.LOG.log(Level.SEVERE,
                     "Got Exception in Updating port list: {0}", e.toString());
-            this.println("Error: Could not Update Port List ", Color.RED);
+            this.println("Error: Could not Update Port List ", 
+                    this.xColor_Error);
             return;
         }
         this.xCB_Port.removeAllItems();
-        if(this.nso.arsPortList.length > 1){
+        if (this.nso.arsPortList.length > 1) {
             for (Object object : nso.arsPortList) {
                 this.xCB_Port.addItem(object);
             }
-        }
-        else
-        {
-            this.println("Error: No Serial Ports Found",Color.RED);
+        } else {
+            this.println("Error: No Serial Ports Found", 
+                    this.xColor_Error);
         }
     }
 
@@ -140,18 +146,16 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         int val;
         String s;
         // Check for Custom port Selection
-        if(this.xCK_CustPort.isSelected())
-        {
-            if(this.xT_CustPort.getText().length()<4)
-            {
-                this.print("\nError Custom port name is too short", Color.RED);
+        if (this.xCK_CustPort.isSelected()) {
+            if (this.xT_CustPort.getText().length() < 4) {
+                this.print("\nError Custom port name is too short", 
+                        this.xColor_Error);
                 throw new Exception("Error Custom port name is too short");
             }
             this.nso.sPortName = this.xT_CustPort.getText();
-        }
-        else if(this.xCB_Port.getItemCount()<=0)
-        {
-            this.print("\nError No port available", Color.RED);
+        } else if (this.xCB_Port.getItemCount() <= 0) {
+            this.print("\nError No port available", 
+                    this.xColor_Error);
             throw new Exception("Error No port available");
         }
         // Derive Baud Rate        
@@ -159,13 +163,15 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
 
             // Error Condition
             if (this.xT_CustBaud.getText().length() < 3) {
-                this.print("\nError No or too small custom baud rate", Color.RED);
+                this.print("\nError No or too small custom baud rate", 
+                        this.xColor_Error);
                 throw new Exception("Error No or too small custom baud rate ");
             }
             val = Integer.parseInt(
                     this.xT_CustBaud.getText());
             if (val <= 0) {
-                this.print("\nError Invalid custom baud rate", Color.RED);
+                this.print("\nError Invalid custom baud rate", 
+                        this.xColor_Error);
                 throw new Exception("Error Invalid custom baud rate " + val);
             }
         } else {
@@ -175,55 +181,55 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         }
         // Assign Baud Rate
         this.nso.iBaudrate = val;
-        this.print("\n BAUD: " + this.nso.iBaudrate, Color.LIGHT_GRAY);
+        this.print("\n BAUD: " + this.nso.iBaudrate, this.xColor_Notice);
         // Assign Data Bits Lenght
         this.nso.iDataBits = Integer.parseInt(
                 this.xCB_DataLen.getSelectedItem().toString());
-        this.print("\n DataLen: " + this.nso.iDataBits, Color.LIGHT_GRAY);
+        this.print("\n DataLen: " + this.nso.iDataBits, this.xColor_Notice);
         // Derive Stop Bits
         s = this.xCB_StopBits.getSelectedItem().toString();
         // Assign Stop Bits
         if ("1".equals(s)) {
             this.nso.iStopBits = 1;
-            this.print("\n Stop Bits: 1", Color.LIGHT_GRAY);
+            this.print("\n Stop Bits: 1", this.xColor_Notice);
         } else if ("1.5".equals(s)) {
             this.nso.iStopBits = 3;
-            this.print("\n Stop Bits: 1.5", Color.LIGHT_GRAY);
+            this.print("\n Stop Bits: 1.5", this.xColor_Notice);
         } else if ("2".equals(s)) {
             this.nso.iStopBits = 2;
-            this.print("\n Stop Bits: 2", Color.LIGHT_GRAY);
+            this.print("\n Stop Bits: 2", this.xColor_Notice);
         }
         // Derive Parity
         s = this.xCB_Parity.getSelectedItem().toString();
         // Assign Parity
         if ("none".equals(s)) {
             this.nso.iParity = 0;
-            this.print("\n Parity: None", Color.LIGHT_GRAY);
+            this.print("\n Parity: None", this.xColor_Notice);
         } else if ("even".equals(s)) {
             this.nso.iParity = 2;
-            this.print("\n Parity: Even", Color.LIGHT_GRAY);
+            this.print("\n Parity: Even", this.xColor_Notice);
         } else if ("odd".equals(s)) {
             this.nso.iParity = 1;
-            this.print("\n Parity: Odd", Color.LIGHT_GRAY);
+            this.print("\n Parity: Odd", this.xColor_Notice);
         } else if ("mark".equals(s)) {
             this.nso.iParity = 3;
-            this.print("\n Parity: Mark", Color.LIGHT_GRAY);
+            this.print("\n Parity: Mark", this.xColor_Notice);
         } else if ("space".equals(s)) {
             this.nso.iParity = 4;
-            this.print("\n Parity: Space", Color.LIGHT_GRAY);
+            this.print("\n Parity: Space", this.xColor_Notice);
         }
         // Derive Handshake
         s = this.xCB_HandShake.getSelectedItem().toString();
         // Assign Handshake 
         if ("off".equals(s)) {
             this.nso.iFlowControl = 0;
-            this.print("\n Handshake: Off", Color.LIGHT_GRAY);
+            this.print("\n Handshake: Off", this.xColor_Notice);
         } else if ("CTS/RTS".equals(s)) {
             this.nso.iFlowControl = 3;
-            this.print("\n Handshake: CTS/RTS", Color.LIGHT_GRAY);
+            this.print("\n Handshake: CTS/RTS", this.xColor_Notice);
         } else if ("Xon/Xoff".equals(s)) {
             this.nso.iFlowControl = 0x0C;
-            this.print("\n Handshake: Xon/Xoff", Color.LIGHT_GRAY);
+            this.print("\n Handshake: Xon/Xoff", this.xColor_Notice);
         }
         // Assign State for RTS and DTR
         this.nso.bDTR = this.xCK_DTR.isSelected();
@@ -404,7 +410,6 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
             if (needEndl) {
                 s += this.sEndl;
             }
-            this.println(s, Color.BLACK);
         }
         return s;
     }
@@ -415,11 +420,11 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
     public void gotRxData(byte[] arb) {
         if (this.nso.isPortOpen) {
             if (this.xRB_RXmode_Ascii.isSelected()) {
-                this.print(this.asciistr(arb, false), Color.BLACK);
+                this.print(this.asciistr(arb, false), this.xColor_Receive);
             } else if (this.xRB_RXmode_Mixed.isSelected()) {
-                this.print(this.asciistr(arb, true), Color.BLACK);
+                this.print(this.asciistr(arb, true), this.xColor_Receive);
             } else if (this.xRB_RXmode_Hex.isSelected()) {
-                this.print(this.hexstr(arb), Color.BLACK);
+                this.print(this.hexstr(arb), this.xColor_Receive);
             }
         }
     }
@@ -434,38 +439,39 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
 
     @Override
     public void changeDSR(boolean state) {
-        this.println("DSR: " + state, Color.ORANGE);
+        this.println("DSR: " + state, this.xColor_Status);
         this.xL_DSR.setOpaque(state);
     }
 
     @Override
     public void changeRI(boolean state) {
-        this.println("RI: " + state, Color.ORANGE);
+        this.println("RI: " + state, this.xColor_Status);
         this.xL_RI.setOpaque(state);
     }
 
     @Override
     public void changeCTS(boolean state) {
-        this.println("CTS: " + state, Color.ORANGE);
+        this.println("CTS: " + state, this.xColor_Status);
         this.xL_CTS.setOpaque(state);
     }
 
     @Override
     public void changeRLSD(boolean state) {
-        this.println("RSLD: " + state, Color.ORANGE);
+        this.println("RSLD: " + state, this.xColor_Status);
         this.xL_RSLD.setOpaque(state);
     }
 
     @Override
     public void gotBreak(boolean state) {
-        this.println("Got break Condiion on TX line", Color.ORANGE);
+        this.println("Got break Condiion on TX line", this.xColor_Status);
     }
 
     @Override
     public void notifyError(eNeelSerialStatus lvl, String from, String error) {
         this.println("Error: \nfrom: " + from
                 + "\ninfo: " + error
-                + "\n Level: " + lvl.name() + " = " + lvl.toString(), Color.RED);
+                + "\n Level: " + lvl.name() + " = " + lvl.toString(), 
+                this.xColor_Error);
     }
     //</editor-fold>
 
@@ -654,8 +660,9 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 .addComponent(xRB_TXmode_Hex)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(xRB_TXmode_Ascii)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(xCB_TXmode_Endl, 0, 1, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(xCB_TXmode_Endl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         xP_TXmodeSelLayout.setVerticalGroup(
             xP_TXmodeSelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -795,8 +802,6 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                         .addComponent(xT_CustPort, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(xCK_CustPort))
-                    .addComponent(xP_RXmodeSel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(xP_TXmodeSel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(xP_ModemStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
                         .addComponent(xB_OpenClose)
@@ -823,13 +828,16 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(xCB_Port, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
+                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(xCB_StopBits, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
                         .addComponent(xT_CustBaud, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(xCK_CustomBaud))
-                    .addGroup(xP_BasicSettingsLayout.createSequentialGroup()
-                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(xCB_StopBits, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(xP_BasicSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(xP_RXmodeSel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(xP_TXmodeSel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         xP_BasicSettingsLayout.setVerticalGroup(
@@ -895,6 +903,11 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         xTP_RX.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
         xTP_RX.setMinimumSize(new java.awt.Dimension(315, 235));
         xTP_RX.setPreferredSize(new java.awt.Dimension(315, 330));
+        xTP_RX.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                xTP_RXKeyTyped(evt);
+            }
+        });
         xSCP_Rx.setViewportView(xTP_RX);
 
         xSP_IO.setTopComponent(xSCP_Rx);
@@ -1122,14 +1135,14 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                             this.nso.sPortName);
                     this.println("Port "
                             + this.nso.sPortName + " Closed",
-                            Color.MAGENTA);
+                            this.xColor_Special);
                 }
             } catch (NeelSerException ser) {
                 NeelSerUI.LOG.log(Level.SEVERE,
                         "Got Exception in Closing port: {0}", ser.toString());
                 this.nso.isPortOpen = false;//Force Close
                 this.println("Error: Could not Close Port "
-                        + this.nso.sPortName, Color.RED);
+                        + this.nso.sPortName, this.xColor_Error);
             }
         } else //Open the Port
         {
@@ -1142,15 +1155,16 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 return;
             }
             // Get the Current Selected Port if not Custom Ports
-            if(!this.xCK_CustPort.isSelected())
+            if (!this.xCK_CustPort.isSelected()) {
                 this.nso.sPortName = this.xCB_Port.getSelectedItem().toString();
+            }
             try {
                 if (this.nso.b_openport(this)) {
                     NeelSerUI.LOG.log(Level.ALL, "Port {0} opened",
                             this.nso.sPortName);
                     this.println("Port "
                             + this.nso.sPortName + " Opened",
-                            Color.MAGENTA);
+                            this.xColor_Special);
                     // Disable All controls and change the Name
                     this.v_EnableDataDisableControls();
                     this.xB_OpenClose.setText("Port Close");
@@ -1159,7 +1173,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 NeelSerUI.LOG.log(Level.SEVERE,
                         "Got Exception in Opening port: {0}", ser.toString());
                 this.println("Error: Could not Open Port "
-                        + this.nso.sPortName, Color.RED);
+                        + this.nso.sPortName, this.xColor_Error);
             }
         }
     }//GEN-LAST:event_xB_OpenCloseActionPerformed
@@ -1172,7 +1186,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 NeelSerUI.LOG.log(Level.SEVERE,
                         "Got Exception in Changing DTR state: {0}", ser.toString());
                 this.println("Error: Could not change DTR state "
-                        + this.xCK_DTR.isSelected(), Color.RED);
+                        + this.xCK_DTR.isSelected(), this.xColor_Error);
             }
         }
     }//GEN-LAST:event_xCK_DTRActionPerformed
@@ -1185,7 +1199,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 NeelSerUI.LOG.log(Level.SEVERE,
                         "Got Exception in Changing RTS state: {0}", ser.toString());
                 this.println("Error: Could not change RTS state "
-                        + this.xCK_DTR.isSelected(), Color.RED);
+                        + this.xCK_DTR.isSelected(), this.xColor_Error);
             }
         }
     }//GEN-LAST:event_xCK_RTSActionPerformed
@@ -1203,6 +1217,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 this.println("Error: Could not Process Data[1] ", Color.RED);
                 return;
             }
+            this.print(s,this.xColor_Send);
             // Send the Data
             try {
                 this.nso.b_SendBytes(s.getBytes());
@@ -1226,6 +1241,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 this.println("Error: Could not Process Data[2] ", Color.RED);
                 return;
             }
+            this.print(s,this.xColor_Send);
             // Send the Data
             try {
                 this.nso.b_SendBytes(s.getBytes());
@@ -1249,6 +1265,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 this.println("Error: Could not Process Data[3] ", Color.RED);
                 return;
             }
+            this.print(s,this.xColor_Send);
             // Send the Data
             try {
                 this.nso.b_SendBytes(s.getBytes());
@@ -1272,6 +1289,7 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
                 this.println("Error: Could not Process Data[4] ", Color.RED);
                 return;
             }
+            this.print(s,this.xColor_Send);
             // Send the Data
             try {
                 this.nso.b_SendBytes(s.getBytes());
@@ -1302,6 +1320,51 @@ public class NeelSerUI extends javax.swing.JFrame implements INeelSerialInterfac
         }
     }//GEN-LAST:event_formWindowClosing
 
+    private void xTP_RXKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_xTP_RXKeyTyped
+        if (this.nso.isPortOpen) {
+            char c = evt.getKeyChar();
+            int code = evt.getKeyCode();
+            String s = String.format("%c", c);
+            if(code != java.awt.event.KeyEvent.VK_ENTER && 
+                    code != java.awt.event.KeyEvent.VK_DELETE && 
+                    code != java.awt.event.KeyEvent.VK_BACK_SPACE && 
+                    c != '\n' && c != '\b')
+            {                
+                // Process the Data
+                try {
+                    s = this.processSendData(s,
+                            this.xRB_TXmode_Hex.isSelected(),
+                            false);
+                } catch (Exception ex) {
+                    NeelSerUI.LOG.log(Level.SEVERE, "Got Exception Processing data [4]: {0}", ex.toString());
+                    this.println("Error: Could not Process Data[4] ", this.xColor_Error);
+                    return;
+                }
+                this.print(s,this.xColor_Send);
+            }
+            else if(code == java.awt.event.KeyEvent.VK_ENTER || c == '\n')
+            {
+                this.print("\r",this.xColor_Send);
+                if(this.xRB_TXmode_Ascii.isSelected())
+                    s = this.sEndl;
+                else
+                    s =  Character.toString('\r');
+            }
+            else
+            {
+                s = Character.toString('\b');
+                //this.print(s,Color.BLACK);                
+            }
+            // Send the Data
+            try {
+                this.nso.b_SendBytes(s.getBytes());
+            } catch (NeelSerException ser) {
+                NeelSerUI.LOG.log(Level.SEVERE, "Got Exception Sending data [4]: {0}", ser.toString());
+                this.println("Error: Could Send Data[4] ", this.xColor_Error);
+            }
+            evt.consume();
+        }
+    }//GEN-LAST:event_xTP_RXKeyTyped
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;

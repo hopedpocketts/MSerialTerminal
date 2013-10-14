@@ -110,8 +110,6 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="xCK_CustPort" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <Component id="xP_RXmodeSel" max="-2" attributes="0"/>
-                          <Component id="xP_TXmodeSel" max="-2" attributes="0"/>
                           <Component id="xP_ModemStatus" alignment="0" max="-2" attributes="0"/>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="xB_OpenClose" min="-2" max="-2" attributes="0"/>
@@ -144,14 +142,18 @@
                               <Component id="xCB_Port" min="-2" pref="90" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel9" min="-2" pref="70" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="xCB_StopBits" min="-2" pref="90" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
                               <Component id="xT_CustBaud" min="-2" pref="70" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="xCK_CustomBaud" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="jLabel9" min="-2" pref="70" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="xCB_StopBits" min="-2" pref="90" max="-2" attributes="0"/>
+                          <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                              <Component id="xP_RXmodeSel" alignment="0" max="32767" attributes="0"/>
+                              <Component id="xP_TXmodeSel" alignment="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="32767" attributes="0"/>
@@ -420,8 +422,9 @@
                           <Component id="xRB_TXmode_Hex" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="xRB_TXmode_Ascii" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="xCB_TXmode_Endl" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="xCB_TXmode_Endl" pref="1" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -769,6 +772,9 @@
                   <Dimension value="[315, 330]"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="xTP_RXKeyTyped"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
